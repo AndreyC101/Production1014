@@ -21,6 +21,11 @@ int Level::getRoomCount()
 	return m_roomCount;
 }
 
+int Level::getHideWallCount()
+{
+	return m_hideWallCount;
+}
+
 Pit* Level::getPits()
 {
 	return m_pits[0];
@@ -29,6 +34,11 @@ Pit* Level::getPits()
 Wall* Level::getWalls()
 {
 	return m_walls[0];
+}
+
+Wall* Level::getHideWalls()
+{
+	return m_hideWalls[0];
 }
 
 glm::vec2* Level::getEnemyPatrols()
@@ -99,7 +109,12 @@ void Level::loadLevel(int level) {
 			m_rooms.push_back(new Room({ roomPoints[i].x , roomPoints[i].y , 16, 16 }));
 		}
 		
-	
+		//added room dimensions - probably all wrong, most likely, like 99 percent probably wrong
+		m_hideWalls.push_back(new Wall({ 0, 0, 448, 32 }));
+		m_hideWalls.push_back(new Wall({ 416 , 0 , 32 , 448 }));
+		m_hideWalls.push_back(new Wall({ 0, 416 , 448, 32 }));
+		m_hideWalls.push_back(new Wall({ 0, 0, 32 , 448 }));
+		hidingRoom = new Room({ 416 , 224, 32, 32 });
 
 	default:
 		std::cout << "Error: No Level Specified";
@@ -141,19 +156,27 @@ void Level::update()
 
 void Level::draw(SDL_Renderer* m_pRenderer)
 {
-	SDL_SetRenderDrawColor(m_pRenderer, 128, 128, 128, 255);
-	SDL_RenderFillRect(m_pRenderer, m_background);
-	SDL_SetRenderDrawColor(m_pRenderer, 32, 32, 32, 255);
-	for (auto& i : m_walls) {
-		SDL_RenderFillRect(m_pRenderer, i->m_getRect());
+
+	//added boolean hide check
+	if (!m_player->hideCheck()) {
+		SDL_SetRenderDrawColor(m_pRenderer, 128, 128, 128, 255);
+		SDL_RenderFillRect(m_pRenderer, m_background);
+		SDL_SetRenderDrawColor(m_pRenderer, 32, 32, 32, 255);
+		for (auto& i : m_walls) {
+			SDL_RenderFillRect(m_pRenderer, i->m_getRect());
+		}
+		SDL_SetRenderDrawColor(m_pRenderer, 102, 0, 0, 255);
+		for (auto& i : m_pits) {
+			SDL_RenderFillRect(m_pRenderer, i->m_getDisplayRect());
+		}
+		for (int i = 0; i < (int)m_pEnemies.size(); i++)
+		{
+			m_pEnemies[i]->draw();
+		}
 	}
-	SDL_SetRenderDrawColor(m_pRenderer, 102, 0, 0, 255);
-	for (auto& i : m_pits) {
-		SDL_RenderFillRect(m_pRenderer, i->m_getDisplayRect());
-	}
-	for (int i = 0; i < (int)m_pEnemies.size(); i++)
+	if (m_player->hideCheck())
 	{
-		m_pEnemies[i]->draw();
+		
 	}
 	if (m_player->heartBeatCheck()) {
 		m_player->draw();
@@ -163,36 +186,45 @@ void Level::draw(SDL_Renderer* m_pRenderer)
 
 bool Level::checkPlayerBounds()
 {
-	for (int i = 0; i < m_wallCount; i++)
-	{
-		if (CollisionManager::CircleToRectCollision(m_player, m_walls[i]->m_getRect()))
+	//added boolean hide check
+	if (!m_player->hideCheck()) {
+		for (int i = 0; i < m_wallCount; i++)
 		{
-			return false;
+			if (CollisionManager::CircleToRectCollision(m_player, m_walls[i]->m_getRect()))
+			{
+				return false;
+			}
+		}
+		for (int i = 0; i < m_pitCount; i++)
+		{
+			if (CollisionManager::CircleToRectCollision(m_player, m_pits[i]->m_getCollisionRect()))
+			{
+				m_player->kill();
+				return false;
+			}
+		}
+		for (int i = 0; i < m_enemyCount; i++)
+		{
+			if (CollisionManager::CircleToCircleCollistion(m_player, m_pEnemies[i]))
+			{
+				m_player->kill();
+				return false;
+			}
 		}
 	}
-	for (int i = 0; i < m_pitCount; i++)
-	{
-		if (CollisionManager::CircleToRectCollision(m_player, m_pits[i]->m_getCollisionRect()))
-		{
-			m_player->kill();
-			return false;
-		}
-	}
-	for (int i = 0; i < m_enemyCount; i++)
-	{
-		if (CollisionManager::CircleToCircleCollistion(m_player, m_pEnemies[i]))
-		{
-			m_player->kill();
-			return false;
-		}
-	}
+
 	//added for loop to handle room collisions
-	for (int i = 0; i < m_roomCount; i++)
-	{
-		if (CollisionManager::CircleToRectCollision(m_player, m_rooms[i]->getCollisionType()))
+	if (m_player->hideCheck()) {
+
+		for (int i = 0; i < m_roomCount; i++)
 		{
-			//go to room - need FSM implementation first
+			if (CollisionManager::CircleToRectCollision(m_player, m_rooms[i]->getCollisionType()))
+			{
+				//go to room - need FSM implementation first
+				m_player->hide();
+			}
 		}
 	}
+
 	return true;
 }

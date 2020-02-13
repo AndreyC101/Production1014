@@ -21,7 +21,6 @@ public:
 	int getPitCount();
 	int getWallCount();
 	int getEnemyCount();
-	int getRoomCount();
 	Pit* getPits();
 	Wall* getWalls();
 	glm::vec2* getEnemyPatrols();
@@ -32,8 +31,15 @@ public:
 	void update();
 	void killPlayer();
 	bool checkPlayerBounds();
+
+	//added public members
+	int getRoomCount();
+	int getHideWallCount();
+	Room* hidingRoom;
+	Wall* getHideWalls();
 private:
-	int m_enemyCount, m_pitCount, m_wallCount, m_roomCount;
+	//added private roomCount and hidewallCount
+	int m_enemyCount, m_pitCount, m_wallCount, m_roomCount, m_hideWallCount;
 	Player* m_player;
 	std::vector<Pit*> m_pits;
 	std::vector<Wall*> m_walls;
@@ -44,8 +50,11 @@ private:
 	std::vector < glm::vec2> e1Points;
 	std::vector < glm::vec2> e2Points;
 	std::vector < glm::vec2> e3Points;
+
+	//added private vectors
 	std::vector <Room*> m_rooms;
 	std::vector < glm::vec2 > roomPoints;
+	std::vector <Wall*> m_hideWalls;
 };
 
 #endif

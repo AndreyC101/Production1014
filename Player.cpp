@@ -63,6 +63,16 @@ void Player::drawLamp()
 	TheTextureManager::Instance()->draw("lampLightTwo", lampPos.x, lampPos.y, TheGame::Instance()->getRenderer(), true);
 }
 
+bool Player::hideCheck()
+{
+	return m_isHiding;
+}
+
+void Player::hide()
+{
+	m_isHiding = !m_isHiding;
+}
+
 void Player::getLampPos(int x, int y)
 {
 	glm::vec2 spawnPos = glm::vec2(getPosition().x - getWidth() / 2, getPosition().y - getHeight()/2);
