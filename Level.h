@@ -37,6 +37,7 @@ public:
 	int getHideWallCount();
 	Room* hidingRoom;
 	Wall* getHideWalls();
+	glm::vec2 hidingRoomSize;
 private:
 	//added private roomCount and hidewallCount
 	int m_enemyCount, m_pitCount, m_wallCount, m_roomCount, m_hideWallCount;

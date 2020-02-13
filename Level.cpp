@@ -1,4 +1,5 @@
 #include"Level.h"
+#include "Game.h"
 
 Level::Level(int level)
 {
@@ -104,10 +105,10 @@ void Level::loadLevel(int level) {
 
 
 		//Added for loop to add rooms since they're all the same size, just different positions
-		for (int i = 0; i < m_roomCount; i++)
+		/*for (int i = 0; i < m_roomCount; i++)
 		{
 			m_rooms.push_back(new Room({ roomPoints[i].x , roomPoints[i].y , 16, 16 }));
-		}
+		}*/
 		
 		//added room dimensions - probably all wrong, most likely, like 99 percent probably wrong
 		m_hideWalls.push_back(new Wall({ 0, 0, 448, 32 }));
@@ -115,6 +116,9 @@ void Level::loadLevel(int level) {
 		m_hideWalls.push_back(new Wall({ 0, 416 , 448, 32 }));
 		m_hideWalls.push_back(new Wall({ 0, 0, 32 , 448 }));
 		hidingRoom = new Room({ 416 , 224, 32, 32 });
+
+		TheTextureManager::Instance()->load("../Assets/textures/hidingRoom.png", "hidingRoom", TheGame::Instance()->getRenderer());
+		hidingRoomSize = TheTextureManager::Instance()->getTextureSize("hidingRoom");
 
 	default:
 		std::cout << "Error: No Level Specified";
@@ -152,6 +156,11 @@ void Level::update()
 	{
 		m_pEnemies[i]->update();
 	}
+
+	if (m_player->hideCheck)
+	{
+		m_player->setPosition(glm::vec2(640 - m_player->getWidth() / 2, 390 - m_player->getHeight()/2));
+	}
 }
 
 void Level::draw(SDL_Renderer* m_pRenderer)
@@ -176,7 +185,7 @@ void Level::draw(SDL_Renderer* m_pRenderer)
 	}
 	if (m_player->hideCheck())
 	{
-		
+		TheTextureManager::Instance()->draw("hidingRoom", 640 - hidingRoomSize.x/2, 390 - hidingRoomSize.y/2, TheGame::Instance()->getRenderer(), true);
 	}
 	if (m_player->heartBeatCheck()) {
 		m_player->draw();
@@ -215,6 +224,14 @@ bool Level::checkPlayerBounds()
 
 	//added for loop to handle room collisions
 	if (m_player->hideCheck()) {
+
+		for (int i = 0; i < m_hideWallCount; i++)
+		{
+			if (CollisionManager::CircleToRectCollision(m_player, m_hideWalls[i]->m_getRect()))
+			{
+				return false;
+			}
+		}
 
 		for (int i = 0; i < m_roomCount; i++)
 		{
