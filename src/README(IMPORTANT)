@@ -1,0 +1,11 @@
+>Player movement has been revamped, and x/y collision is done separately to ensure nothing breaks when working with triggers
+>Hide state has been fully completed, and entrance triggers are now fully functional
+>All states now function properly, but menus need some adjustments
+>Movement and collision checking is now done inside the PlayState, with appropriate functions added, player Update will be reserved for timers and animations only
+
+TODO: 
+>Map colliders need to be setup according to new map layout - this is done in the Playstate::GenerateLevel() function,
+please pay close attention to the entry flags when populating the door vector, as this decided where the alcove will be entered from and how it will be displayed.
+Doors also contain a type, with Alcove pushing the Hide state, and Exit switching the FSM to Win state. this will need to be changed when new levels are added.
+>enemies need to be added to the PlayState, please note the order of translations and collision detection, this order prevents some nasty crashes and should be followed when adding enemies
+>sound effects, animations to be added
