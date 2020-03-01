@@ -52,9 +52,48 @@ bool Util::CircleRect(GameObject* obj1, SDL_Rect obj2)
 	return false;
 }
 
+bool Util::CircleRectExtrapolate(Player* obj1, SDL_Rect obj2)
+{
+	float testX = obj1->GetNewPosition().x, testY = obj1->GetNewPosition().y, distanceX, distanceY, distance;
+	if (obj1->GetNewPosition().x < obj2.x)
+	{
+		testX = obj2.x;
+	}
+	else if (obj1->GetNewPosition().x > obj2.x + obj2.w)
+	{
+		testX = obj2.x + obj2.w;
+	}
+	if (obj1->GetNewPosition().y < obj2.y)
+	{
+		testY = obj2.y;
+	}
+	else if (obj1->GetNewPosition().y > obj2.y + obj2.h)
+	{
+		testY = obj2.y + obj2.h;
+	}
+
+	distanceX = obj1->GetNewPosition().x - testX;
+	distanceY = obj1->GetNewPosition().y - testY;
+	distance = sqrt((distanceX * distanceX) + (distanceY * distanceY));
+
+	if (distance <= obj1->GetCollisionRadius())
+	{
+		return true;
+	}
+	return false;
+}
+
 bool Util::PointCircle(vec2 point, GameObject* obj)
 {
-	if (sqrt((obj->GetPosition().x - point.x) * (obj->GetPosition().x - point.x) + (obj->GetPosition().y - point.y) * (obj->GetPosition().y - point.y) < (obj->GetCollisionRadius()))) {
+	if (sqrt((point.x - obj->GetPosition().x) * (point.x - obj->GetPosition().x) + (point.y - obj->GetPosition().y) * (point.y - obj->GetPosition().y)) < (obj->GetCollisionRadius())) {
+		return true;
+	}
+	return false;
+}
+
+bool Util::PointCircleExtrapolate(vec2 point, Player* obj)
+{
+	if (sqrt((point.x - obj->GetNewPosition().x) * (point.x - obj->GetNewPosition().x) + (point.y - obj->GetNewPosition().y) * (point.y - obj->GetNewPosition().y)) < (obj->GetCollisionRadius())) {
 		return true;
 	}
 	return false;

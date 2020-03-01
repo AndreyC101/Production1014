@@ -5,6 +5,8 @@
 #include "Enemy.h"
 #include "LevelObjects.h"
 
+static int m_entry;
+
 class State {
 protected:
 	FSMState m_currentState;
@@ -34,7 +36,8 @@ public:
 
 class PlayState : public State {
 private:
-	vector<GameObject*> m_vObjects;
+	vector<Player*> m_vPlayer;
+	vector<GameObject*> m_vObjects; //placeholder vector for enemies
 	vector<Wall*> m_vWalls;
 	vector<Door*> m_vDoors;
 public:
@@ -45,6 +48,8 @@ public:
 	void Update();
 	void Render();
 	void Exit();
+	bool CheckCollisions();
+	int CheckTriggers(); //0-no collision, 1-exit trigger, 2, 3, 4, 5-alcove entries(+2) --add other triggers here
 };
 
 class PauseState : public State {
@@ -62,17 +67,20 @@ public:
 class HideState : public State {
 private:
 	SDL_Rect m_backGround;
-	vector<GameObject*> m_vObjects;
+	vector<Player*> m_vPlayer;
 	vector<Wall*> m_vWalls;
-	int m_entry;
+	vector<Door*>m_vDoor;
 public:
 	HideState() {}
 	~HideState() {}
-	void Enter(int entry); // 0-Up, 1-Down, 2-Left, 3-Right
+	void Enter(); // 0-Up, 1-Down, 2-Left, 3-Right
 	void Update();
 	void Render();
 	void Exit();
 	vector<Wall*>& GetWalls() { return m_vWalls; }
+	bool CheckCollisions();
+	bool CheckTriggers();
+	static void SetEntry(int entry) { m_entry = entry; }
 };
 
 class WinState : public State {

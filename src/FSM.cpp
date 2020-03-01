@@ -164,9 +164,10 @@ void PlayState::GenerateLevel(int level)
 {
 	switch (level) {
 	case 1:
-		m_vObjects.push_back(new Player(ACTIVE)); //m_vObjects.front will always be player
-		m_vObjects[0]->SetPosition(vec2(60, 380));
-		//TODO: populate m_vObjects with enemies and set patrol points here
+		m_vPlayer.push_back(new Player(ACTIVE)); 
+		m_vPlayer.back()->SetPosition(vec2(60, 380));
+		m_vDoors.push_back(new Door({ 132, 126, 32, 32 }, 2, ALCOVE)); //test door
+		//TODO: populate m_vObjects with enemies and set their respective patrol points here
 		break;
 		//Other cases to impletent new levels
 	default:
@@ -181,21 +182,59 @@ void PlayState::Enter()
 
 void PlayState::Update() // *PLAY LOOP RUNS HERE*
 {
+	bool earlyHalt = false;
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_W)) {
-		m_vObjects[0]->SetVelocity(m_vObjects[0]->GetVelocity() + vec2(0.0f, -1.0f));
+		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(0.0f, -1.0f));
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_S)) {
-		m_vObjects[0]->SetVelocity(m_vObjects[0]->GetVelocity() + vec2(0.0f, 1.0f));
+		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(0.0f, 1.0f));
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_A)) {
-		m_vObjects[0]->SetVelocity(m_vObjects[0]->GetVelocity() + vec2(-1.0f, 1.0f));
+		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(-1.0f, 0.0f));
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_D)) {
-		m_vObjects[0]->SetVelocity(m_vObjects[0]->GetVelocity() + vec2(1.0f, 0.0f));
+		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(1.0f, 0.0f));
 	}
-	m_vObjects[0]->SetVelocity(Util::Normalize(m_vObjects[0]->GetVelocity()));
-	m_vObjects[0]->Update();
-	m_vObjects[0]->SetVelocity(vec2(0.0f, 0.0f));
+	m_vPlayer[0]->SetVelocity(Util::Normalize(m_vPlayer[0]->GetVelocity()));
+	m_vPlayer[0]->Update();
+	m_vPlayer[0]->CalculateNewPositionX();
+	if (!CheckCollisions()) {
+		int trigger = CheckTriggers();
+		if (trigger == 0)
+			m_vPlayer[0]->MoveX();
+		else if (trigger == 1) {
+			earlyHalt = true;
+			Engine::Instance().GetFSM().ChangeState(new WinState());
+		}
+		else if (trigger > 1 && trigger < 6) {
+			if (m_vPlayer[0]->GetHideFrames() <= 0) {
+				m_vPlayer[0]->SetHideFrames(20);
+				HideState::SetEntry(trigger - 2);
+				Engine::Instance().GetFSM().PushState(new HideState());
+			}
+			else m_vPlayer[0]->MoveX();
+		}
+	}
+	if (!earlyHalt) {
+		m_vPlayer[0]->CalculateNewPositionY();
+		if (!CheckCollisions()) {
+			int trigger = CheckTriggers();
+			if (trigger == 0)
+				m_vPlayer[0]->MoveY();
+			else if (trigger == 1) {
+				Engine::Instance().GetFSM().ChangeState(new WinState());
+			}
+			else if (trigger > 1 && trigger < 6) {
+				if (m_vPlayer[0]->GetHideFrames() <= 0) {
+					m_vPlayer[0]->SetHideFrames(20);
+					HideState::SetEntry(trigger - 2);
+					Engine::Instance().GetFSM().PushState(new HideState());
+				}
+				else m_vPlayer[0]->MoveY();
+			}
+		}
+	}
+	m_vPlayer[0]->SetVelocity(vec2(0.0f, 0.0f));
 
 	//TODO: Update enemies here
 }
@@ -205,16 +244,25 @@ void PlayState::Render()
 	std::cout << "Rendering Game..." << std::endl;
 	SDL_RenderClear(Engine::Instance().GetRenderer());
 	TextureManager::Instance()->draw("dungeon1", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
-	for (int i = 0; i < (int)m_vObjects.size(); i++)
+	for (int i = 0; i < (int)m_vPlayer.size(); i++)
 	{
-		m_vObjects[i]->Draw();
+		m_vPlayer[i]->Draw();
 	}
+	//TODO: draw enemies and objects
 	if (dynamic_cast<PlayState*>(Engine::Instance().GetFSM().GetStates().back()))
 		State::Render();
+
 }
 
 void PlayState::Exit()
 {
+	for (int i = 0; i < (int)m_vPlayer.size(); i++)
+	{
+		delete m_vPlayer[i];
+		m_vPlayer[i] = nullptr;
+	}
+	m_vPlayer.clear();
+	m_vPlayer.shrink_to_fit();
 	for (int i = 0; i < (int)m_vObjects.size(); i++)
 	{
 		delete m_vObjects[i];
@@ -236,8 +284,33 @@ void PlayState::Exit()
 	}
 	m_vDoors.clear();
 	m_vDoors.shrink_to_fit();
+}
 
-	//TODO: Delete enemies
+bool PlayState::CheckCollisions()
+{
+	for(int i = 0; i < (int)m_vWalls.size(); i++) {
+		if (Util::CircleRectExtrapolate(m_vPlayer[0], m_vWalls[i]->GetCollider()))
+			return true;
+	}
+	return false;
+}
+
+int PlayState::CheckTriggers()//0-no collision, 1-exit trigger, 2-alcove door trigger upper, 3-alcove door trigger lower, 4-alcove door trigger left, 5-alcove door trigger right --add other triggers here
+{
+	for (int i = 0; i < (int)m_vDoors.size(); i++) {
+		if (Util::PointCircle(m_vDoors[i]->GetTrigger(), m_vPlayer[0])) {
+			switch (m_vDoors[i]->GetType()) {
+			case EXIT:
+				return 1;
+			case ALCOVE:
+				return m_vDoors[i]->GetEntry() + 2;
+			default:
+				cout << "unspecified trigger reached" << endl;
+				break;
+			}
+		}
+	}
+	return 0;
 }
 
 void DeathState::Enter()
@@ -276,10 +349,9 @@ void DeathState::Exit()
 	m_vButtons.shrink_to_fit();
 }
 
-void HideState::Enter(int entry) // Player Enters the hidden alcove
+void HideState::Enter() // Player Enters the hidden alcove
 {
-	m_vObjects.push_back(new Player(ACTIVE));
-	m_entry = entry;
+	m_vPlayer.push_back(new Player(ACTIVE));
 	m_backGround = SDL_Rect{ 0, 0, WIDTH, HEIGHT };
 	switch (m_entry) {
 	case 0: //Entry from above
@@ -288,8 +360,9 @@ void HideState::Enter(int entry) // Player Enters the hidden alcove
 		m_vWalls.push_back(new Wall(SDL_Rect{ 288, 482, 448, 126 }));
 		m_vWalls.push_back(new Wall(SDL_Rect{ 540, 160, 197, 61 }));
 		m_vWalls.push_back(new Wall(SDL_Rect{ 608, 222, 128, 259 }));
-		m_vWalls.push_back(new Door(SDL_Rect{ 477, 160, 64, 64 }, 1, EXIT));
-		m_vObjects[0]->SetPosition(vec2(530, 260));
+		m_vDoor.push_back(new Door(SDL_Rect{ 477, 160, 64, 64 }, 1, EXIT));
+		m_vPlayer[0]->SetPosition(vec2(530, 260));
+		m_vPlayer[0]->SetNewPosition(vec2(530, 260));
 		break;
 	case 1: //Entry from below
 		m_vWalls.push_back(new Wall(SDL_Rect{ 543, 488, 192, 121 }));
@@ -297,8 +370,9 @@ void HideState::Enter(int entry) // Player Enters the hidden alcove
 		m_vWalls.push_back(new Wall(SDL_Rect{ 288, 160, 448, 126 }));
 		m_vWalls.push_back(new Wall(SDL_Rect{ 288, 547, 197, 61 }));
 		m_vWalls.push_back(new Wall(SDL_Rect{ 608, 222, 128, 259 }));
-		m_vWalls.push_back(new Door(SDL_Rect{ 477, 160, 64, 64 }, 0, EXIT));
-		m_vObjects[0]->SetPosition(vec2(495, 500));
+		m_vDoor.push_back(new Door(SDL_Rect{ 477, 160, 64, 64 }, 0, EXIT));
+		m_vPlayer[0]->SetPosition(vec2(495, 500));
+		m_vPlayer[0]->SetNewPosition(vec2(495, 500));
 		break;
 	case 2: //Entry from left
 		m_vWalls.push_back(new Wall(SDL_Rect{ 287, 415, 121, 193 }));
@@ -306,8 +380,9 @@ void HideState::Enter(int entry) // Player Enters the hidden alcove
 		m_vWalls.push_back(new Wall(SDL_Rect{ 610, 160, 126, 448 }));
 		m_vWalls.push_back(new Wall(SDL_Rect{ 287, 160, 62, 197 }));
 		m_vWalls.push_back(new Wall(SDL_Rect{ 348, 160, 263, 128 }));
-		m_vWalls.push_back(new Door(SDL_Rect{ 288, 354, 64, 64 }, 3, EXIT));
-		m_vObjects[0]->SetPosition(vec2(390, 360));
+		m_vDoor.push_back(new Door(SDL_Rect{ 288, 354, 64, 64 }, 3, EXIT));
+		m_vPlayer[0]->SetPosition(vec2(390, 360));
+		m_vPlayer[0]->SetNewPosition(vec2(390, 360));
 		break;
 	case 3: //Entry from right
 		m_vWalls.push_back(new Wall(SDL_Rect{ 615, 160, 121, 193 }));
@@ -315,8 +390,9 @@ void HideState::Enter(int entry) // Player Enters the hidden alcove
 		m_vWalls.push_back(new Wall(SDL_Rect{ 288, 160, 126, 448 }));
 		m_vWalls.push_back(new Wall(SDL_Rect{ 675, 411, 62, 197 }));
 		m_vWalls.push_back(new Wall(SDL_Rect{ 413, 480, 263, 128 }));
-		m_vWalls.push_back(new Door(SDL_Rect{ 672, 349, 64, 64 }, 2, EXIT));
-		m_vObjects[0]->SetPosition(vec2(630, 405));
+		m_vDoor.push_back(new Door(SDL_Rect{ 672, 349, 64, 64 }, 2, EXIT));
+		m_vPlayer[0]->SetPosition(vec2(630, 405));
+		m_vPlayer[0]->SetNewPosition(vec2(630, 405));
 		break;
 	default:
 		break;
@@ -325,21 +401,46 @@ void HideState::Enter(int entry) // Player Enters the hidden alcove
 
 void HideState::Update()
 {
+	bool earlyExit = false;
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_W)) {
-		m_vObjects[0]->SetVelocity(m_vObjects[0]->GetVelocity() + vec2(0.0f, -1.0f));
+		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(0.0f, -1.0f));
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_S)) {
-		m_vObjects[0]->SetVelocity(m_vObjects[0]->GetVelocity() + vec2(0.0f, 1.0f));
+		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(0.0f, 1.0f));
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_A)) {
-		m_vObjects[0]->SetVelocity(m_vObjects[0]->GetVelocity() + vec2(-1.0f, 1.0f));
+		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(-1.0f, 0.0f));
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_D)) {
-		m_vObjects[0]->SetVelocity(m_vObjects[0]->GetVelocity() + vec2(1.0f, 0.0f));
+		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(1.0f, 0.0f));
 	}
-	m_vObjects[0]->SetVelocity(Util::Normalize(m_vObjects[0]->GetVelocity()));
-	m_vObjects[0]->Update();
-	m_vObjects[0]->SetVelocity(vec2(0.0f, 0.0f));
+	m_vPlayer[0]->SetVelocity(Util::Normalize(m_vPlayer[0]->GetVelocity()));
+	m_vPlayer[0]->Update();
+	m_vPlayer[0]->CalculateNewPositionX();
+	if (!CheckCollisions()) {
+		int trigger = CheckTriggers();
+		if (trigger == 0) {
+			m_vPlayer[0]->MoveX();
+		}
+		else {
+			earlyExit = true;
+			Engine::Instance().GetFSM().PopState();
+		}
+	}
+	if (!earlyExit && m_vPlayer.size()!=0) {
+		m_vPlayer.back()->CalculateNewPositionY();
+		if (!CheckCollisions()) {
+			if (!CheckCollisions()) {
+				int trigger = CheckTriggers();
+				if (trigger == 0)
+					m_vPlayer.back()->MoveY();
+				else
+					Engine::Instance().GetFSM().PopState();
+			}
+		}
+	}
+	if (!earlyExit && m_vPlayer.size() != 0)
+		m_vPlayer.back()->SetVelocity(vec2(0.0f, 0.0f));
 }
 
 void HideState::Render()
@@ -348,7 +449,7 @@ void HideState::Render()
 	SDL_RenderClear(Engine::Instance().GetRenderer());
 	SDL_SetRenderDrawColor(Engine::Instance().GetRenderer(), 255, 255, 255, 255);
 	SDL_RenderFillRect(Engine::Instance().GetRenderer(), &m_backGround); // use opaque background to block view of map
-	switch (m_entry) {
+ 	switch (m_entry) {
 	case 0:
 		TextureManager::Instance()->draw("alcove", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), 270, 255, true, SDL_FLIP_NONE);
 		break;
@@ -364,9 +465,10 @@ void HideState::Render()
 	default:
 		break;
 	}
-	for (int i = 0; i < (int)m_vObjects.size(); i++) {
-		m_vObjects[i]->Draw();
+	for (int i = 0; i < (int)m_vPlayer.size(); i++) {
+		m_vPlayer[i]->Draw();
 	}
+	State::Render();
 }
 
 void HideState::Exit()
@@ -378,12 +480,37 @@ void HideState::Exit()
 	}
 	m_vWalls.clear();
 	m_vWalls.shrink_to_fit();
-	for (int i = 0; i < (int)m_vObjects.size(); i++) {
-		delete m_vObjects[i];
-		m_vObjects[i] = nullptr;
+	for (int i = 0; i < (int)m_vDoor.size(); i++) {
+		delete m_vDoor[i];
+		m_vDoor[i] = nullptr;
 	}
-	m_vObjects.clear();
-	m_vObjects.shrink_to_fit();
+	m_vDoor.clear();
+	m_vDoor.shrink_to_fit();
+	for (int i = 0; i < (int)m_vPlayer.size(); i++) {
+		delete m_vPlayer[i];
+		m_vPlayer[i] = nullptr;
+	}
+	m_vPlayer.clear();
+	m_vPlayer.shrink_to_fit();
+}
+
+bool HideState::CheckCollisions()
+{
+	for (int i = 0; i < (int)m_vWalls.size(); i++) {
+		if (Util::CircleRectExtrapolate(m_vPlayer[0], m_vWalls[i]->GetCollider()))
+			return true;
+	}
+	return false;
+}
+
+bool HideState::CheckTriggers()
+{
+	for (int i = 0; i < (int)m_vDoor.size(); i++) {
+		if (Util::PointCircle(m_vDoor[i]->GetTrigger(), m_vPlayer[0])) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void WinState::Enter()
