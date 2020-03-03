@@ -4,11 +4,12 @@ enum FSMState {
 	PAUSE,
 	GAME,
 	HIDE,
-	GAME_OVER
+	GAME_OVER,
+	WIN
 };
 
 enum PlayerState {
-	ACTIVE,
+	ALIVE,
 	HIDDEN,
 	DEAD
 };
@@ -27,3 +28,9 @@ enum DoorState {
 	OPEN,
 	CLOSED
 };
+
+enum ActiveState {
+	ACTIVE,
+	INACTIVE
+};
+

@@ -32,6 +32,9 @@ public:
 	void draw(std::string id, int x, int y, SDL_Renderer* pRenderer, bool centered = false, SDL_RendererFlip flip = SDL_FLIP_NONE);
 	void draw(std::string id, int x, int y, int width, int height, SDL_Renderer* pRenderer, double angle, int alpha, SDL_RendererFlip flip = SDL_FLIP_NONE);
 	void draw(std::string id, int x, int y, SDL_Renderer* pRenderer, double angle, int alpha, bool centered = false, SDL_RendererFlip flip = SDL_FLIP_NONE);
+
+	void modifiedDraw(std::string id, int x, int y, int spriteMax, int xOffest, SDL_Renderer* pRenderer, double angle, int alpha, bool centered = false, SDL_RendererFlip flip = SDL_FLIP_NONE);
+
 	glm::vec2 getTextureSize(std::string id);
 	void setAlpha(std::string id, Uint8 newAlpha);
 	void setColour(std::string id, Uint8 red, Uint8 green, Uint8 blue);

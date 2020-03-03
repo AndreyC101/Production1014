@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "LevelObjects.h"
-
+#include "Collectible.h"
 static int m_entry;
 
 class State {
@@ -36,10 +36,23 @@ public:
 
 class PlayState : public State {
 private:
+	bool m_completed, m_exiting;
+	int m_collectibleCounter;
 	vector<Player*> m_vPlayer;
-	vector<GameObject*> m_vObjects; //placeholder vector for enemies
+	vector<GameObject*> m_vObjects;
 	vector<Wall*> m_vWalls;
 	vector<Door*> m_vDoors;
+	vector<Collectible*> m_vCollectibles;
+	//enemies
+	vector<glm::vec2> e1Points;
+	vector<glm::vec2> e2Points;
+	vector<glm::vec2> e3Points;
+	vector<glm::vec2> e4Points;
+	vector<glm::vec2> e5Points;
+	vector<glm::vec2> e6Points;
+
+	vector<Enemy*> m_enemies;
+
 public:
 	void GenerateLevel(int level);
 	PlayState() {}
@@ -50,6 +63,12 @@ public:
 	void Exit();
 	bool CheckCollisions();
 	int CheckTriggers(); //0-no collision, 1-exit trigger, 2, 3, 4, 5-alcove entries(+2) --add other triggers here
+	int GetCollectibleCounter() { return m_collectibleCounter; }
+	void SetCollectibleCounter(int newCounter) { m_collectibleCounter = newCounter; }
+	bool GetCompleted() { return m_completed; }
+	void SetCompleted(bool check) { m_completed = check; }
+	bool GetExiting() { return m_exiting; }
+	void SetExiting(bool check) { m_exiting = check; }
 };
 
 class PauseState : public State {

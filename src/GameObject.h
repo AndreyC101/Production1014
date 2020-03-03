@@ -17,6 +17,8 @@ private:
 	vec2 m_scale;
 	ObjectType m_type;
 	float m_collisionRadius;
+	int m_width;
+	int m_height;
 public:
 	GameObject();
 	~GameObject() {}
@@ -32,7 +34,10 @@ public:
 	void SetObjectType(ObjectType type) { m_type = type; }
 	float GetCollisionRadius() { return m_collisionRadius; }
 	void SetCollisionRadius(float radius) { m_collisionRadius = radius; }
-
+	int GetWidth() { return m_width; };
+	int GetHeight() { return m_height; };
+	void SetWidth(int newWidth) { m_width = newWidth; };
+	void SetHeight(int newHeight) { m_height = newHeight; };
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
 	virtual void Clean() = 0;

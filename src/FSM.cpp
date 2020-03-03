@@ -3,6 +3,8 @@
 #include "SoundManager.h"
 #include "Engine.h"
 #include "Util.h"
+#include "Dog.h"
+#include "Slug.h"
 
 void FSM::Update()
 {
@@ -59,8 +61,15 @@ void FSM::Clean()
 
 void FSM::LoadAssets()
 {
+	TextureManager::Instance()->load("../Assets/Bob_Up.png", "player1", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/Bob_Down.png", "player2", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/Bob_Left.png", "player3", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/Bob_Right.png", "player4", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/player.png", "player", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/dog.png", "dog", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/rib.png", "rib", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/skull.png", "skull", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/bone.png", "bone", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/dungeon1.png", "dungeon1", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/dungeon1_complete.png", "dungeon1_complete", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/start_menu.png", "start_menu", Engine::Instance().GetRenderer());
@@ -164,10 +173,115 @@ void PlayState::GenerateLevel(int level)
 {
 	switch (level) {
 	case 1:
-		m_vPlayer.push_back(new Player(ACTIVE)); 
-		m_vPlayer.back()->SetPosition(vec2(60, 380));
-		m_vDoors.push_back(new Door({ 132, 126, 32, 32 }, 2, ALCOVE)); //test door
-		//TODO: populate m_vObjects with enemies and set their respective patrol points here
+		SetCollectibleCounter(3);
+		m_vPlayer.push_back(new Player(PlayerState::ALIVE)); 
+		m_vPlayer.back()->SetPosition(vec2(60, 360));
+
+		m_vDoors.push_back(new Door({ 132, 126, 32, 32 }, 2, ALCOVE)); //test alcove door
+		m_vDoors.push_back(new Door({ 96, 126, 32, 32 }, 2, ALCOVE));
+		m_vDoors.push_back(new Door({ 345, 96, 32, 32 }, 3, ALCOVE));
+		m_vDoors.push_back(new Door({ 96, 610, 32, 32 }, 3, ALCOVE));
+		m_vDoors.push_back(new Door({ 640, 126, 32, 32 }, 2, ALCOVE));
+		m_vDoors.push_back(new Door({ 320, 448, 32, 32 }, 1, ALCOVE));
+		m_vDoors.push_back(new Door({ 448, 640, 32, 32 }, 2, ALCOVE));
+		m_vDoors.push_back(new Door({ 832, 580, 32, 32 }, 3, ALCOVE));
+
+		m_vDoors.push_back(new Door({ 0, 360, 32, 32 }, 3, EXIT));
+		m_vDoors.push_back(new Door({ 996, 352, 32, 64 }, 2, EXIT));
+
+		m_vWalls.push_back(new Wall({ 0, 0, int(1280 * 0.8), int(33 * 0.8) }));
+		m_vWalls.push_back(new Wall({ 0, int(927 * 0.8), int(1280 * 0.8), int(33 * 0.8) }));
+		m_vWalls.push_back(new Wall({ 0, 0, int(33 * 0.8), int(960 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(1247 * 0.8), 0, int(33 * 0.8), int(960 * 0.8) }));
+
+		m_vWalls.push_back(new Wall({ int(86 * 0.8), int(85 * 0.8), int(148 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(165 * 0.8), int(90 * 0.8), int(65 * 0.8), int(230 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(285 * 0.8), int(85 * 0.8), int(149 * 0.8), int(228 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(485 * 0.8), int(85 * 0.8), int(70 * 0.8), int(150 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(725 * 0.8), int(85 * 0.8), int(70 * 0.8), int(270 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(845 * 0.8), int(85 * 0.8), int(70 * 0.8), int(149 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(1125 * 0.8), int(85 * 0.8), int(70 * 0.8), int(230 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(86 * 0.8), int(205 * 0.8), int(100 * 0.8), int(110 * 0.8) }));
+		m_vWalls.push_back(new Wall({ 0, int(364 * 0.8), int(114 * 0.8), int(71 * 0.8) }));
+		m_vWalls.push_back(new Wall({ 0, int(485 * 0.8), int(114 * 0.8), int(110 * 0.8) }));
+		m_vWalls.push_back(new Wall({ 0, int(646 * 0.8), int(114 * 0.8), int(290 * 0.8) }));
+		m_vWalls.push_back(new Wall({ 0, 710, int(555 * 0.8), int(55 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(165 * 0.8), int(366 * 0.8), int(70 * 0.8), int(468 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(165 * 0.8), int(765 * 0.8), int(270 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(605 * 0.8), 0, int(70 * 0.8), int(200 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(485 * 0.8), int(165 * 0.8), int(190 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(405 * 0.8), int(285 * 0.8), int(109 * 0.8), int(190 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(725 * 0.8), int(285 * 0.8), int(190 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(846 * 0.8), int(285 * 0.8), int(70 * 0.8), int(149 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(965 * 0.8), int(245 * 0.8), int(70 * 0.8), int(189 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(965 * 0.8), int(245 * 0.8), int(170 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(1085 * 0.8), int(365 * 0.8), int(70 * 0.8), int(230 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(1085 * 0.8), int(365 * 0.8), int(165 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(1085 * 0.8), int(525 * 0.8), int(109 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(965 * 0.8), int(645 * 0.8), int(110 * 0.8), int(149 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(965 * 0.8), int(845 * 0.8), int(109 * 0.8), int(110 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(965 * 0.8), int(645 * 0.8), int(230 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(285 * 0.8), int(645 * 0.8), int(150 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(285 * 0.8), int(525 * 0.8), int(270 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(365 * 0.8), int(645 * 0.8), int(70 * 0.8), int(190 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(485 * 0.8), int(525 * 0.8), int(70 * 0.8), int(365 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(605 * 0.8), int(525 * 0.8), int(70 * 0.8), int(349 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(725 * 0.8), int(405 * 0.8), int(70 * 0.8), int(229 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(725 * 0.8), int(805 * 0.8), int(190 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(845 * 0.8), int(485 * 0.8), int(70 * 0.8), int(445 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(1125 * 0.8), int(645 * 0.8), int(70 * 0.8), int(230 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(1125 * 0.8), int(805 * 0.8), int(130 * 0.8), int(70 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(1195 * 0.8), int(205 * 0.8), int(60 * 0.8), int(30 * 0.8) }));
+		m_vWalls.push_back(new Wall({ int(285 * 0.8), int(830 * 0.8), int(30 * 0.8), int(60 * 0.8) }));
+
+		m_vCollectibles.push_back(new Collectible(vec2(980, 130), ObjectType::BONE));
+		m_vCollectibles.push_back(new Collectible(vec2(960, 720), ObjectType::RIB));
+		m_vCollectibles.push_back(new Collectible(vec2(280, 690), ObjectType::SKULL));
+
+		e1Points.push_back(glm::vec2(48, 48));
+		e1Points.push_back(glm::vec2(208, 48));
+		e1Points.push_back(glm::vec2(208, 272));
+		e1Points.push_back(glm::vec2(48, 272));
+		e1Points.push_back(glm::vec2(0, 0));
+
+		e2Points.push_back(glm::vec2(208, 304));
+		e2Points.push_back(glm::vec2(208, 400));
+		e2Points.push_back(glm::vec2(304, 400));
+		e2Points.push_back(glm::vec2(304, 304));
+		e2Points.push_back(glm::vec2(0, 0));
+
+		e3Points.push_back(glm::vec2(432, 208));
+		e3Points.push_back(glm::vec2(560, 208));
+		e3Points.push_back(glm::vec2(560, 400));
+		e3Points.push_back(glm::vec2(432, 400));
+		e3Points.push_back(glm::vec2(0, 0));
+
+		e4Points.push_back(glm::vec2(656, 48));
+		e4Points.push_back(glm::vec2(880, 48));
+		e4Points.push_back(glm::vec2(880, 160));
+		e4Points.push_back(glm::vec2(752, 160));
+		e4Points.push_back(glm::vec2(752, 208));
+		e4Points.push_back(glm::vec2(656, 208));
+		e4Points.push_back(glm::vec2(0, 0));
+
+		e5Points.push_back(glm::vec2(560, 400));
+		e5Points.push_back(glm::vec2(560, 718));
+		e5Points.push_back(glm::vec2(464, 718));
+		e5Points.push_back(glm::vec2(464, 400));
+		e5Points.push_back(glm::vec2(0, 0));
+
+		e6Points.push_back(glm::vec2(752, 368));
+		e6Points.push_back(glm::vec2(752, 480));
+		e6Points.push_back(glm::vec2(848, 480));
+		e6Points.push_back(glm::vec2(848, 368));
+		e6Points.push_back(glm::vec2(0, 0));
+
+		m_enemies.push_back(new Dog(e1Points));
+		m_enemies.push_back(new Slug(e2Points));
+		m_enemies.push_back(new Dog(e3Points));
+		m_enemies.push_back(new Slug(e4Points));
+		m_enemies.push_back(new Dog(e5Points));
+		m_enemies.push_back(new Slug(e6Points));
 		break;
 		//Other cases to impletent new levels
 	default:
@@ -178,22 +292,29 @@ void PlayState::GenerateLevel(int level)
 void PlayState::Enter()
 {
 	GenerateLevel(1);
+	SetExiting(false);
+	SetCompleted(false);
 }
 
 void PlayState::Update() // *PLAY LOOP RUNS HERE*
 {
+	
 	bool earlyHalt = false;
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_W)) {
 		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(0.0f, -1.0f));
+		m_vPlayer[0]->setMovementSprite(1);
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_S)) {
 		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(0.0f, 1.0f));
+		m_vPlayer[0]->setMovementSprite(2);
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_A)) {
 		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(-1.0f, 0.0f));
+		m_vPlayer[0]->setMovementSprite(3);
 	}
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_D)) {
 		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(1.0f, 0.0f));
+		m_vPlayer[0]->setMovementSprite(4);
 	}
 	m_vPlayer[0]->SetVelocity(Util::Normalize(m_vPlayer[0]->GetVelocity()));
 	m_vPlayer[0]->Update();
@@ -204,7 +325,7 @@ void PlayState::Update() // *PLAY LOOP RUNS HERE*
 			m_vPlayer[0]->MoveX();
 		else if (trigger == 1) {
 			earlyHalt = true;
-			Engine::Instance().GetFSM().ChangeState(new WinState());
+			SetExiting(true);
 		}
 		else if (trigger > 1 && trigger < 6) {
 			if (m_vPlayer[0]->GetHideFrames() <= 0) {
@@ -222,7 +343,7 @@ void PlayState::Update() // *PLAY LOOP RUNS HERE*
 			if (trigger == 0)
 				m_vPlayer[0]->MoveY();
 			else if (trigger == 1) {
-				Engine::Instance().GetFSM().ChangeState(new WinState());
+				SetExiting(true);
 			}
 			else if (trigger > 1 && trigger < 6) {
 				if (m_vPlayer[0]->GetHideFrames() <= 0) {
@@ -236,14 +357,32 @@ void PlayState::Update() // *PLAY LOOP RUNS HERE*
 	}
 	m_vPlayer[0]->SetVelocity(vec2(0.0f, 0.0f));
 
-	//TODO: Update enemies here
+	if (GetExiting()) {
+		Engine::Instance().GetFSM().ChangeState(new WinState());
+	}
+	//enemies
+	for (int i = 0; i < (int)m_enemies.size(); i++)
+	{
+		m_enemies[i]->Update();
+	}
 }
 
 void PlayState::Render()
 {
 	std::cout << "Rendering Game..." << std::endl;
 	SDL_RenderClear(Engine::Instance().GetRenderer());
-	TextureManager::Instance()->draw("dungeon1", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
+	if (!GetCompleted())
+		TextureManager::Instance()->draw("dungeon1", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
+	else 
+		TextureManager::Instance()->draw("dungeon1_complete", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
+	for (int i = 0; i < (int)m_enemies.size(); i++)
+	{
+		m_enemies[i]->Draw();
+	}
+	for (int i = 0; i < (int)m_vCollectibles.size(); i++)
+	{
+		m_vCollectibles[i]->Draw();
+	}
 	for (int i = 0; i < (int)m_vPlayer.size(); i++)
 	{
 		m_vPlayer[i]->Draw();
@@ -284,6 +423,20 @@ void PlayState::Exit()
 	}
 	m_vDoors.clear();
 	m_vDoors.shrink_to_fit();
+	for (int i = 0; i < (int)m_vCollectibles.size(); i++)
+	{
+		delete m_vCollectibles[i];
+		m_vCollectibles[i] = nullptr;
+	}
+	m_vCollectibles.clear();
+	m_vCollectibles.shrink_to_fit();
+	for (int i = 0; i < (int)m_enemies.size(); i++)
+	{
+		delete m_enemies[i];
+		m_enemies[i] = nullptr;
+	}
+	m_enemies.clear();
+	m_enemies.shrink_to_fit();
 }
 
 bool PlayState::CheckCollisions()
@@ -291,6 +444,25 @@ bool PlayState::CheckCollisions()
 	for(int i = 0; i < (int)m_vWalls.size(); i++) {
 		if (Util::CircleRectExtrapolate(m_vPlayer[0], m_vWalls[i]->GetCollider()))
 			return true;
+	}
+	for (int i = 0; i < (int)m_vDoors.size(); i++) {
+		if (m_vDoors[i]->GetState() == CLOSED && Util::CircleRectExtrapolate(m_vPlayer[0], m_vDoors[i]->GetCollider()))
+			return true;
+	}
+	for (int i = 0; i < (int)m_vCollectibles.size(); i++) {  // collectibles collector
+		if (Util::CircleCircle(m_vPlayer[0], m_vCollectibles[i])) {
+			if (m_vCollectibles[i]->GetActiveState() == ACTIVE) {
+				SetCollectibleCounter(GetCollectibleCounter() - 1);
+				m_vCollectibles[i]->SetActiveState(ActiveState::INACTIVE);
+				cout << "collision with collectible" << endl;
+				if (GetCollectibleCounter() == 0) {
+					for (int j = 0; j < (int)m_vDoors.size(); j++) {
+						m_vDoors[j]->SetState(DoorState::OPEN);
+					}
+					SetCompleted(true);
+				}
+			}
+		}
 	}
 	return false;
 }
@@ -303,7 +475,7 @@ int PlayState::CheckTriggers()//0-no collision, 1-exit trigger, 2-alcove door tr
 			case EXIT:
 				return 1;
 			case ALCOVE:
-				return m_vDoors[i]->GetEntry() + 2;
+				return m_vDoors[i]->GetEntry() + 2; 
 			default:
 				cout << "unspecified trigger reached" << endl;
 				break;
@@ -351,8 +523,8 @@ void DeathState::Exit()
 
 void HideState::Enter() // Player Enters the hidden alcove
 {
-	m_vPlayer.push_back(new Player(ACTIVE));
-	m_backGround = SDL_Rect{ 0, 0, WIDTH, HEIGHT };
+	m_vPlayer.push_back(new Player(PlayerState::ALIVE));
+	m_backGround = SDL_Rect{ 0, 0, WIDTH, HEIGHT };;
 	switch (m_entry) {
 	case 0: //Entry from above
 		m_vWalls.push_back(new Wall(SDL_Rect{ 288, 160, 192, 121 }));
@@ -447,7 +619,7 @@ void HideState::Render()
 {
 	std::cout << "Rendering Alcove..." << std::endl;
 	SDL_RenderClear(Engine::Instance().GetRenderer());
-	SDL_SetRenderDrawColor(Engine::Instance().GetRenderer(), 255, 255, 255, 255);
+	SDL_SetRenderDrawColor(Engine::Instance().GetRenderer(), 0, 0, 0, 255);
 	SDL_RenderFillRect(Engine::Instance().GetRenderer(), &m_backGround); // use opaque background to block view of map
  	switch (m_entry) {
 	case 0:
@@ -515,6 +687,7 @@ bool HideState::CheckTriggers()
 
 void WinState::Enter()
 {
+	SetCurrentState(WIN);
 	m_vButtons.push_back(new RestartButton(vec2(370, 560)));
 	m_vButtons.push_back(new QuitButton(vec2(690, 560)));
 }
@@ -529,9 +702,12 @@ void WinState::Update()
 void WinState::Render()
 {
 	std::cout << "Rendering Win Screen..." << std::endl;
+	SDL_RenderClear(Engine::Instance().GetRenderer());
+	TextureManager::Instance()->draw("win_menu", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
 	for (int i = 0; i < (int)m_vButtons.size(); i++) {
 		m_vButtons[i]->Draw();
 	}
+	State::Render();
 }
 
 void WinState::Exit()

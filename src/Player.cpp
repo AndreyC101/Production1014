@@ -5,10 +5,15 @@
 
 Player::Player(PlayerState state) {
 	SetState(state);
-	SetScale(vec2(30.0f, 30.0f));
+	SetScale(vec2(25.0f, 25.0f));
 	SetObjectType(ObjectType::PLAYER);
-	SetMoveSpeed(3.5f);
-	SetCollisionRadius(15);
+	SetMoveSpeed(2.5f);
+	SetCollisionRadius(12);
+
+	m_frame = 0;
+	m_frameMax = 8;
+	m_Sprite = 0;
+	m_SpriteMax = 1;
 }
 
 void Player::CalculateLampPosition()
@@ -21,12 +26,12 @@ void Player::CalculateLampPosition()
 
 void Player::CalculateNewPositionX()
 {
-	m_newPosition.x = GetPosition().x + GetVelocity().x;
+	m_newPosition.x = GetPosition().x + GetVelocity().x * GetMoveSpeed();
 	
 }
 void Player::CalculateNewPositionY()
 {
-	m_newPosition.y = GetPosition().y + GetVelocity().y;
+	m_newPosition.y = GetPosition().y + GetVelocity().y * GetMoveSpeed();
 
 }
 
@@ -41,6 +46,7 @@ void Player::MoveY()
 }
 
 void Player::Update() {
+	CalculateLampPosition();
 	SetHideFrames(GetHideFrames() - 1);
 	if (GetHideFrames() < 0) SetHideFrames(0);
 
@@ -48,6 +54,23 @@ void Player::Update() {
 }
 
 void Player::Draw() {
-	TextureManager::Instance()->draw("player", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);
-	TextureManager::Instance()->draw("lamp", m_lampPosition.x, m_lampPosition.y, Engine::Instance().GetRenderer(), true);
+	switch (getMovementSprite())
+	{
+	case 1:
+		spriteString = "player1";
+		break;
+	case 2:
+		spriteString = "player2";
+		break;
+	case 3:
+		spriteString = "player3";
+		break;
+	case 4:
+		spriteString = "player4";
+		break;
+	default:
+		break;
+	}
+	TextureManager::Instance()->modifiedDraw(spriteString, GetPosition().x, GetPosition().y, m_SpriteMax, imageOffset, Engine::Instance().GetRenderer(), 0, 255, true);
+	TextureManager::Instance()->draw("lamp_light", m_lampPosition.x, m_lampPosition.y, Engine::Instance().GetRenderer(), true);
 }

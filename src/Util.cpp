@@ -1,4 +1,10 @@
 #include "Util.h"
+#include "GLM/gtc/constants.hpp"
+#include "GLM/gtx/norm.hpp"
+
+const float Util::EPSILON = glm::epsilon<float>();
+const float Util::Deg2Rad = glm::pi<float>() / 180.0f;
+const float Util::Rad2Deg = 180.0f / glm::pi<float>();
 
 bool Util::AABB(SDL_Rect obj1, SDL_Rect obj2)
 {
@@ -142,4 +148,44 @@ vec2 Util::Normalize(vec2 vector)
 		normalized.y = vector.y * length;
 	}
 	return normalized;
+}
+
+float Util::Sign(float value)
+{
+	return (value < 0.0f) ? -1.0f : 1.0f;
+}
+
+float Util::Distance(glm::vec2 vecA, glm::vec2 vecB)
+{
+	float x = vecB.x - vecA.x;
+	float y = vecB.y - vecA.y;
+	return sqrt((x * x) + (y * y));
+}
+
+float Util::Clamp(float value, float min, float max)
+{
+	if (value < min) {
+		value = min;
+	}
+	else if (value > max) {
+		value = max;
+	}
+	return value;
+}
+
+float Util::Dot(glm::vec2 lhs, glm::vec2 rhs)
+{
+	return lhs.x * rhs.x + lhs.y * rhs.y;
+}
+
+float Util::Angle(glm::vec2 from, glm::vec2 to)
+{
+	return acos(Util::Clamp(Util::Dot(Util::Normalize(from), Util::Normalize(to)), -1.0f, 1.0f)) * 57.29578f;
+}
+
+float  Util::SignedAngle(glm::vec2 from, glm::vec2 to)
+{
+	float unsigned_angle = Util::Angle(from, to);
+	float sign = Util::Sign(from.x * to.y - from.y * to.x);
+	return unsigned_angle * sign;
 }

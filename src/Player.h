@@ -8,6 +8,14 @@ private:
 	PlayerState m_state;
 	vec2 m_newPosition;
 	vec2 m_lampPosition;
+	int m_frame,
+		m_frameMax,
+		m_Sprite,
+		m_SpriteMax;
+	int imageOffset = 0;
+	string spriteString;
+	int m_movementSprite = 4;
+	void m_animate();
 public:
 	Player(PlayerState state);
 	~Player() {}
@@ -23,6 +31,8 @@ public:
 	void SetNewPosition(vec2 position) { m_newPosition = position; }
 	void CalculateNewPositionX();
 	void CalculateNewPositionY();
+	void setMovementSprite(int spriteNum) { m_movementSprite = spriteNum; }
+	int getMovementSprite() { return m_movementSprite; }
 	void MoveX();
 	void MoveY();
 	void Update();
