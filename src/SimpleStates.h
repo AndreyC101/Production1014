@@ -8,6 +8,11 @@ enum FSMState {
 	WIN
 };
 
+enum CurrentLevel {
+	TUTORIAL,
+	LEVEL_1
+};
+
 enum PlayerState {
 	ACTIVE,
 	HIDDEN,

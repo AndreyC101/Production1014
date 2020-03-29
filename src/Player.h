@@ -23,6 +23,7 @@ private:
 	int m_movementSprite = 4;
 	int m_lightSprite = 8;
 	void m_animate();
+	bool m_lightActive;
 public:
 	static Player* Instance() {
 		if (s_pInstance == nullptr){
@@ -49,6 +50,8 @@ public:
 	void setLightSprite(int spriteNum) { m_lightSprite = spriteNum;  }
 	int getLightSprite() { return m_lightSprite; }
 	void MovementInput();
+	bool GetLightActive() { return m_lightActive; }
+	void SetLightActive(bool active) { m_lightActive = active; }
 	void MoveX();
 	void MoveY();
 	void Update();

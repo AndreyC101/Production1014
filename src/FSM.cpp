@@ -72,6 +72,11 @@ void FSM::LoadAssets()
 	TextureManager::Instance()->load("../Assets/rib.png", "rib", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/skull.png", "skull", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/bone.png", "bone", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/P_bone.png", "pBone", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/crossbone.png", "crossbone", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/deathSkull.png", "dSkull", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/fishbone.png", "fishbone", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/crackskull.png", "crackskull", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/dungeon1_alternate.png", "dungeon1", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/dungeon1_complete.png", "dungeon1_complete", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/start_menu.png", "start_menu", Engine::Instance().GetRenderer());
@@ -84,7 +89,9 @@ void FSM::LoadAssets()
 	TextureManager::Instance()->load("../Assets/lamp_light.png", "lamp_light", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/alcove.png", "alcove", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/QuitButtonSelected.png", "quit_button_selected", Engine::Instance().GetRenderer());
-	TextureManager::Instance()->load("../Assets/light.png", "HUDlight", Engine::Instance().GetRenderer()); \
+	TextureManager::Instance()->load("../Assets/light.png", "HUDlight", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/tutorial_map_closed.png", "tutorial", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/tutorial_map_open.png", "tutorial_complete", Engine::Instance().GetRenderer());
 
 	//ADD ALL AUDIO FILES HERE USING SoundManager::Instance()->load()
 
@@ -175,12 +182,28 @@ void PauseState::Exit()
 void PlayState::GenerateLevel(int level)
 {
 	switch (level) {
+	case 0:
+		SetMapStrings("tutorial", "tutorial_complete");
+		m_pPlayer->SetPosition(vec2(60, 368));
+
+		m_vWalls.push_back(new Wall({ 0, 0, 30, 768 }));
+		m_vWalls.push_back(new Wall({ 0, 0, 1024, 30 }));
+		m_vWalls.push_back(new Wall({ 994, 0, 30, 169 }));
+		m_vWalls.push_back(new Wall({ 994, 213, 30, 121 }));
+		m_vWalls.push_back(new Wall({ 994, 390, 30, 378 }));
+		m_vWalls.push_back(new Wall({ 0, 738, 1024, 30 }));
+
+		m_vDoors.push_back(new Door({ 988,352,32,32 }, 2, EXIT));
+		m_vDoors.push_back(new Door({ 988,176,32,32 }, 2, ALCOVE));
+
+		m_vCollectibles.push_back(new Collectible(vec2(330, 310), ObjectType::BONE));
+		m_vCollectibles.push_back(new Collectible(vec2(405, 310), ObjectType::RIB));
+		m_vCollectibles.push_back(new Collectible(vec2(480, 310), ObjectType::SKULL));
+		SetCollectibleCounter((int)m_vCollectibles.size());
+
+		break;
 	case 1:
-		SetCollectibleCounter(3);
-		//m_vPlayer.push_back(new Player(PlayerState::ALIVE)); 
-		//m_vPlayer.back()->SetPosition(vec2(60, 360));
-		//m_vPlayer.back()->numCollectibles = GetCollectibleCounter();
-		m_pPlayer = Player::Instance();
+		SetMapStrings("dungeon1", "dungeon1_complete");
 		m_pPlayer->SetPosition(vec2(60, 360));
 
 		m_vDoors.push_back(new Door({ 126, 128, 32, 32 }, 2, ALCOVE)); //test alcove door
@@ -253,9 +276,13 @@ void PlayState::GenerateLevel(int level)
 		m_vWalls.push_back(new Wall({ 292, 572, 56, 40 }));
 		m_vWalls.push_back(new Wall({ 28, 292, 63, 50 }));
 
+		m_vCollectibles.push_back(new Collectible(vec2(50, 50), ObjectType::CROSSBONE));
 		m_vCollectibles.push_back(new Collectible(vec2(980, 130), ObjectType::BONE));
 		m_vCollectibles.push_back(new Collectible(vec2(960, 720), ObjectType::RIB));
 		m_vCollectibles.push_back(new Collectible(vec2(280, 690), ObjectType::SKULL));
+		m_vCollectibles.push_back(new Collectible(vec2(500, 300), ObjectType::CRACKSKULL));
+		m_vCollectibles.push_back(new Collectible(vec2(650, 720), ObjectType::FISHBONE));
+		SetCollectibleCounter((int)m_vCollectibles.size());
 
 		e1Points.push_back(glm::vec2(48, 48));
 		e1Points.push_back(glm::vec2(208, 48));
@@ -302,7 +329,6 @@ void PlayState::GenerateLevel(int level)
 		m_enemies.push_back(new Dog(e5Points));
 		m_enemies.push_back(new Slug(e6Points));
 		break;
-		//Other cases to impletent new levels
 	default:
 		break;
 	}
@@ -311,11 +337,14 @@ void PlayState::GenerateLevel(int level)
 void PlayState::Enter()
 {
 	SetCurrentState(GAME);
-	GenerateLevel(1);
+	SetCurrentLevel(TUTORIAL);
+	m_pPlayer = Player::Instance();
+	GenerateLevel(0);
 	SetExiting(false);
 	SetCompleted(false);
 	SetHiding(false);
 	m_pPlayer->SetState(ACTIVE);
+	m_pPlayer->SetLightActive(false);
 	SetIndexOfActiveDoor((int)m_vDoors.size());
 }
 
@@ -355,8 +384,9 @@ void PlayState::Update() // *PLAY LOOP RUNS HERE*
 		if (m_pPlayer->GetState() == ACTIVE)
 			m_pPlayer->SetState(DEAD);
 	}
-	if (m_pPlayer->GetState() == PlayerState::ACTIVE && GetExiting())
-		Engine::Instance().GetFSM().ChangeState(new WinState());
+	if (m_pPlayer->GetState() == PlayerState::ACTIVE && GetExiting()) {
+		ChangeLevel();
+	}
 	else if (m_pPlayer->GetState() == PlayerState::DEAD)
 		Engine::Instance().GetFSM().ChangeState(new DeathState());
 }
@@ -366,9 +396,9 @@ void PlayState::Render()
 	std::cout << "Rendering Game..." << std::endl;
 	SDL_RenderClear(Engine::Instance().GetRenderer());
 	if (!GetCompleted())
-		TextureManager::Instance()->draw("dungeon1", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
+		TextureManager::Instance()->draw(GetMapString(), WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
 	else 
-		TextureManager::Instance()->draw("dungeon1_complete", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
+		TextureManager::Instance()->draw(GetMapCompletedString(), WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
 	for (int i = 0; i < (int)m_enemies.size(); i++)
 	{
 		m_enemies[i]->Draw();
@@ -392,6 +422,75 @@ void PlayState::Render()
 
 void PlayState::Exit()
 {
+	EmptyLevel();
+	m_pPlayer = nullptr;
+}
+
+bool PlayState::CheckCollisions()
+{
+	for(int i = 0; i < (int)m_vWalls.size(); i++) {
+		if (Util::CircleRectExtrapolate(m_pPlayer, m_vWalls[i]->GetCollider()))
+			return true;
+	}
+	for (int i = 0; i < (int)m_vDoors.size(); i++) {
+		if (m_vDoors[i]->GetState() == CLOSED && Util::CircleRectExtrapolate(m_pPlayer, m_vDoors[i]->GetCollider()))
+			return true;
+	}
+	for (int i = 0; i < (int)m_vCollectibles.size(); i++) {  // collectibles collector
+		if (Util::CircleCircle(m_pPlayer, m_vCollectibles[i])) {
+			if (m_vCollectibles[i]->GetActiveState() == ACTIVE) {
+				SetCollectibleCounter(GetCollectibleCounter() - 1);
+				m_vCollectibles[i]->SetActiveState(ActiveState::OFF);
+				cout << "collision with collectible" << endl;
+				if (GetCollectibleCounter() == 0) {
+					for (int j = 0; j < (int)m_vDoors.size(); j++) {
+						m_vDoors[j]->SetState(DoorState::OPEN);
+					}
+					SetCompleted(true);
+				}
+			}
+		}
+	}
+	return false;
+}
+
+int PlayState::CheckTriggers()//0-no collision, 1-exit trigger, 2-alcove door trigger upper, 3-alcove door trigger lower, 4-alcove door trigger left, 5-alcove door trigger right --add other triggers here
+{
+	for (int i = 0; i < (int)m_vDoors.size(); i++) {
+		if (Util::PointCircle(m_vDoors[i]->GetTrigger(), m_pPlayer) && m_indexOfActiveDoor != i) {
+			if (m_pPlayer->GetHideFrames() == 0) SetIndexOfActiveDoor(i);
+			switch (m_vDoors[i]->GetType()) {
+			case EXIT:
+				return 1;
+			case ALCOVE:
+				return m_vDoors[i]->GetEntry() + 2; 
+			default:
+				cout << "unspecified trigger reached" << endl;
+				break;
+			}
+		}
+	}
+	return 0;
+}
+
+void PlayState::MovePlayerToActiveDoor()
+{
+	m_pPlayer->SetPosition(m_vDoors[GetIndexOfActiveDoor()]->GetTrigger());
+}
+
+bool PlayState::CheckEnemies()
+{
+	for (int i = 0; i < (int)m_enemies.size(); i++) {
+		if (Util::CircleCircle(m_pPlayer, m_enemies[i])) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void PlayState::EmptyLevel()
+{
+	SetMapStrings("", "");
 	for (int i = 0; i < (int)m_vObjects.size(); i++)
 	{
 		delete m_vObjects[i];
@@ -427,69 +526,25 @@ void PlayState::Exit()
 	}
 	m_enemies.clear();
 	m_enemies.shrink_to_fit();
-	m_pPlayer = nullptr;
 }
 
-bool PlayState::CheckCollisions()
+void PlayState::ChangeLevel()
 {
-	for(int i = 0; i < (int)m_vWalls.size(); i++) {
-		if (Util::CircleRectExtrapolate(m_pPlayer, m_vWalls[i]->GetCollider()))
-			return true;
+	switch (GetCurrentLevel()) {
+	case TUTORIAL:
+		EmptyLevel();
+		GenerateLevel(1);
+		SetExiting(false);
+		SetCompleted(false);
+		SetHiding(false);
+		SetIndexOfActiveDoor((int)m_vDoors.size());
+		SetCurrentLevel(LEVEL_1);
+		m_pPlayer->SetLightActive(true);
+		break;
+	case LEVEL_1:
+		Engine::Instance().GetFSM().ChangeState(new WinState());
+		break;
 	}
-	for (int i = 0; i < (int)m_vDoors.size(); i++) {
-		if (m_vDoors[i]->GetState() == CLOSED && Util::CircleRectExtrapolate(m_pPlayer, m_vDoors[i]->GetCollider()))
-			return true;
-	}
-	for (int i = 0; i < (int)m_vCollectibles.size(); i++) {  // collectibles collector
-		if (Util::CircleCircle(m_pPlayer, m_vCollectibles[i])) {
-			if (m_vCollectibles[i]->GetActiveState() == ACTIVE) {
-				SetCollectibleCounter(GetCollectibleCounter() - 1);
-				m_vCollectibles[i]->SetActiveState(ActiveState::OFF);
-				cout << "collision with collectible" << endl;
-				if (GetCollectibleCounter() == 0) {
-					for (int j = 0; j < (int)m_vDoors.size(); j++) {
-						m_vDoors[j]->SetState(DoorState::OPEN);
-					}
-					SetCompleted(true);
-				}
-			}
-		}
-	}
-	return false;
-}
-
-int PlayState::CheckTriggers()//0-no collision, 1-exit trigger, 2-alcove door trigger upper, 3-alcove door trigger lower, 4-alcove door trigger left, 5-alcove door trigger right --add other triggers here
-{
-	for (int i = 0; i < (int)m_vDoors.size(); i++) {
-		if (Util::PointCircle(m_vDoors[i]->GetTrigger(), m_pPlayer) && m_indexOfActiveDoor!=i) {
-			SetIndexOfActiveDoor(i);
-			switch (m_vDoors[i]->GetType()) {
-			case EXIT:
-				return 1;
-			case ALCOVE:
-				return m_vDoors[i]->GetEntry() + 2; 
-			default:
-				cout << "unspecified trigger reached" << endl;
-				break;
-			}
-		}
-	}
-	return 0;
-}
-
-void PlayState::MovePlayerToActiveDoor()
-{
-	m_pPlayer->SetPosition(m_vDoors[GetIndexOfActiveDoor()]->GetTrigger());
-}
-
-bool PlayState::CheckEnemies()
-{
-	for (int i = 0; i < (int)m_enemies.size(); i++) {
-		if (Util::CircleCircle(m_pPlayer, m_enemies[i])) {
-			return true;
-		}
-	}
-	return false;
 }
 
 void DeathState::Enter()
@@ -600,7 +655,7 @@ void HideState::Update()
 	if (movePlayerY) m_pPlayer->MoveY();
 	m_pPlayer->SetVelocity(vec2(0.0f, 0.0f));
 	if (GetExiting()) {
-		m_pPlayer->SetHideFrames(30);
+		m_pPlayer->SetHideFrames(60);
 		m_pActivePlayState->MovePlayerToActiveDoor();
 		m_pActivePlayState->SetHiding(false);
 		m_pActivePlayState->SetIndexOfActiveDoor(999);
