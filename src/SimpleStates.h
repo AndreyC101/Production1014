@@ -9,9 +9,10 @@ enum FSMState {
 };
 
 enum PlayerState {
-	ALIVE,
+	ACTIVE,
 	HIDDEN,
-	DEAD
+	DEAD,
+	INACTIVE
 };
 
 enum EnemyState {
@@ -30,7 +31,7 @@ enum DoorState {
 };
 
 enum ActiveState {
-	ACTIVE,
-	INACTIVE
+	ON,
+	OFF
 };
 

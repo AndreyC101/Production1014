@@ -13,6 +13,7 @@ public:
 	SDL_Rect GetCollider() { return m_collider; }
 	ObjectType GetType() { return m_type; }
 	void SetType(ObjectType newType) { m_type = newType; }
+	void Debug();
 };
 
 class Door : public Wall {
@@ -29,4 +30,5 @@ public:
 	void SetState(DoorState newState) { m_state = newState; }
 	int GetEntry() { return m_entry; }
 	void SetEntry(int entry) { m_entry = entry; }
+	void Debug();
 };

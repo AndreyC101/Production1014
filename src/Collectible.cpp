@@ -7,13 +7,13 @@ Collectible::Collectible(vec2 position, ObjectType type)
 {
 	SetPosition(position);
 	SetObjectType(type);
-	SetActiveState(ActiveState::ACTIVE);
+	SetActiveState(ActiveState::ON);
 	SetCollisionRadius(Util::Magnitude(TextureManager::Instance()->getTextureSize("bone"))/2);
 }
 
 void Collectible::Draw()
 {
-	if (GetActiveState() == ACTIVE) {
+	if (GetActiveState() == ON) {
 		switch (GetObjectType()) {
 		case BONE:
 			TextureManager::Instance()->draw("bone", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);

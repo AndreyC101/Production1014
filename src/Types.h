@@ -9,10 +9,10 @@ enum ObjectType {
 	START_MENU,
 	PAUSE_MENU,
 	DEATH_MENU,
-	DEFAULT,
 	BONE,
 	RIB,
-	SKULL
+	SKULL,
+	UNDEFINED
 };
 
 enum ButtonType {
