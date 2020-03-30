@@ -22,7 +22,6 @@ bool SoundManager::load(std::string fileName, std::string id, sound_type type)
 			std::cout << "Could not load music: ERROR - " << Mix_GetError() << std::endl;
 			return false;
 		}
-
 		m_music[id] = pMusic;
 		return true;
 	}

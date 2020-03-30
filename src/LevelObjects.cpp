@@ -1,4 +1,5 @@
 #include "LevelObjects.h"
+#include "Engine.h"
 
 void Wall::SetCollider(SDL_Rect bounds)
 {
@@ -8,6 +9,12 @@ void Wall::SetCollider(SDL_Rect bounds)
 Wall::Wall(SDL_Rect bounds)
 {
 	SetCollider(bounds);
+}
+
+void Wall::Debug()
+{
+	SDL_SetRenderDrawColor(Engine::Instance().GetRenderer(), 255, 0, 0, 255);
+	SDL_RenderFillRect(Engine::Instance().GetRenderer(), &GetCollider());
 }
 
 Door::Door(SDL_Rect bounds, int entry, ObjectType type) : Wall(bounds)
@@ -32,4 +39,10 @@ Door::Door(SDL_Rect bounds, int entry, ObjectType type) : Wall(bounds)
 	default:
 		break;
 	}
+}
+
+void Door::Debug()
+{
+	SDL_SetRenderDrawColor(Engine::Instance().GetRenderer(), 0, 255, 0, 100);
+	SDL_RenderFillRect(Engine::Instance().GetRenderer(), &GetCollider());
 }

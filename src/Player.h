@@ -3,23 +3,33 @@
 
 class Player : public GameObject {
 private:
-	const float m_lightDistance = 10.0f;
+	Player();
+	~Player() {}
+	static Player* s_pInstance;
+	const float m_lightDistance = 50.0f;
 	float m_moveSpeed, m_hideFrames;
 	PlayerState m_state;
 	vec2 m_newPosition;
 	vec2 m_lampPosition;
+	double m_lampAngle;
 	int m_frame,
 		m_frameMax,
 		m_Sprite,
-		m_SpriteMax;
-	int imageOffset = 0;
+		m_SpriteMax,
+		m_spriteMax2;
 	string spriteString;
+	string spriteStringTwo;
 	int m_movementSprite = 4;
-	void m_animate();
+	int m_lightSprite = 8;
 public:
-	Player(PlayerState state);
-	~Player() {}
-	PlayerState GetState() { return m_state; }
+	static Player* Instance() {
+		if (s_pInstance == nullptr){
+			s_pInstance = new Player();
+			return s_pInstance;
+		}
+		return s_pInstance;
+	}
+ 	PlayerState GetState() { return m_state; }
 	void SetState(PlayerState newState) { m_state = newState; }
 	vec2 GetNewPosition() { return m_newPosition; }
 	float GetLightDistance() { return m_lightDistance; }
@@ -33,9 +43,15 @@ public:
 	void CalculateNewPositionY();
 	void setMovementSprite(int spriteNum) { m_movementSprite = spriteNum; }
 	int getMovementSprite() { return m_movementSprite; }
+	void setLightSprite(int spriteNum) { m_lightSprite = spriteNum;  }
+	int getLightSprite() { return m_lightSprite; }
+	void MovementInput();
 	void MoveX();
 	void MoveY();
 	void Update();
 	void Draw();
 	void Clean() {}
+
+
+	int imageOffset = 0;
 };
