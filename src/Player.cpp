@@ -102,6 +102,6 @@ void Player::Draw() {
 			break;
 		}
 		TextureManager::Instance()->modifiedDraw(spriteString, GetPosition().x, GetPosition().y, m_SpriteMax, imageOffset, Engine::Instance().GetRenderer(), 0, 255, true);
-		TextureManager::Instance()->draw("lamp_light", m_lampPosition.x, m_lampPosition.y, Engine::Instance().GetRenderer(), true);
+		//TextureManager::Instance()->draw("lamp_light", m_lampPosition.x, m_lampPosition.y, Engine::Instance().GetRenderer(), true);
 	}
 }

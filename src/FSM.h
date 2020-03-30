@@ -57,6 +57,8 @@ private:
 
 	vector<collectibleHUD*> m_colHUD;
 
+	int levelInt;
+
 public:
 	void GenerateLevel(int level);
 	PlayState() {}
