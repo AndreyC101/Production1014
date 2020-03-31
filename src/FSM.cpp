@@ -75,9 +75,9 @@ void FSM::LoadAssets()
 	TextureManager::Instance()->load("../Assets/dungeon1_alternate.png", "dungeon1", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/dungeon1_complete.png", "dungeon1_complete", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/level2.png", "dungeon2", Engine::Instance().GetRenderer());
-	TextureManager::Instance()->load("../Assets/dungeon2_complete.png", "dungeon2_complete", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/level2_completed.png", "dungeon2_complete", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/level3.png", "dungeon3", Engine::Instance().GetRenderer());
-	TextureManager::Instance()->load("../Assets/dungeon3_complete.png", "dungeon3_complete", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/level3_completed.png", "dungeon3_complete", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/StartScreen.png", "start_menu", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/pause_menu.png", "pause_menu", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/death_menu.png", "death_menu", Engine::Instance().GetRenderer());
@@ -89,6 +89,13 @@ void FSM::LoadAssets()
 	TextureManager::Instance()->load("../Assets/alcove.png", "alcove", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/QuitButtonSelected.png", "quit_button_selected", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/light.png", "HUDlight", Engine::Instance().GetRenderer()); 
+	TextureManager::Instance()->load("../Assets/tutorial_map_closed.png", "tutorial", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/tutorial_map_open.png", "tutorial_complete", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/P_bone.png", "pBone", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/crossbone.png", "crossbone", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/deathSkull.png", "dSkull", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/fishbone.png", "fishbone", Engine::Instance().GetRenderer());
+	TextureManager::Instance()->load("../Assets/crackskull.png", "crackskull", Engine::Instance().GetRenderer());
 
 	//ADD ALL AUDIO FILES HERE USING SoundManager::Instance()->load()
 
@@ -182,11 +189,35 @@ void PlayState::GenerateLevel(int level)
 
 
 	switch (levelInt) {
-	case 1:
+	case 0:
+		SetCurrentLevel(TUTORIAL);
+		SetMapStrings("tutorial", "tutorial_complete");
+		m_pPlayer = Player::Instance();
+		m_pPlayer->SetLightActive(false);
+		m_pPlayer->SetPosition(vec2(60, 368));
+
+		m_vWalls.push_back(new Wall({ 0, 0, 30, 768 }));
+		m_vWalls.push_back(new Wall({ 0, 0, 1024, 30 }));
+		m_vWalls.push_back(new Wall({ 994, 0, 30, 169 }));
+		m_vWalls.push_back(new Wall({ 994, 213, 30, 121 }));
+		m_vWalls.push_back(new Wall({ 994, 390, 30, 378 }));
+		m_vWalls.push_back(new Wall({ 0, 738, 1024, 30 }));
+
+		m_vDoors.push_back(new Door({ 988,352,32,32 }, 2, EXIT));
+		m_vDoors.push_back(new Door({ 988,176,32,32 }, 2, ALCOVE));
+
+		m_vCollectibles.push_back(new Collectible(vec2(330, 310), ObjectType::BONE));
+		m_vCollectibles.push_back(new Collectible(vec2(405, 310), ObjectType::RIB));
+		m_vCollectibles.push_back(new Collectible(vec2(480, 310), ObjectType::SKULL));
 		SetCollectibleCounter((int)m_vCollectibles.size());
+
+		break;
+	case 1:
+		SetCurrentLevel(LEVEL_1);
 		//m_vPlayer.push_back(new Player(PlayerState::ALIVE)); 
 		//m_vPlayer.back()->SetPosition(vec2(60, 360));
 		//m_vPlayer.back()->numCollectibles = GetCollectibleCounter();
+		SetMapStrings("dungeon1", "dungeon1_complete");
 		m_pPlayer = Player::Instance();
 		m_pPlayer->SetPosition(vec2(60, 360));
 
@@ -260,10 +291,17 @@ void PlayState::GenerateLevel(int level)
 		m_vWalls.push_back(new Wall({ 292, 572, 56, 40 }));
 		m_vWalls.push_back(new Wall({ 28, 292, 63, 50 }));
 
+		m_vCollectibles.push_back(new Collectible(vec2(50, 50), ObjectType::CROSSBONE));
 		m_vCollectibles.push_back(new Collectible(vec2(980, 130), ObjectType::BONE));
 		m_vCollectibles.push_back(new Collectible(vec2(960, 720), ObjectType::RIB));
 		m_vCollectibles.push_back(new Collectible(vec2(280, 690), ObjectType::SKULL));
+		m_vCollectibles.push_back(new Collectible(vec2(500, 300), ObjectType::CRACKSKULL));
+		m_vCollectibles.push_back(new Collectible(vec2(650, 720), ObjectType::FISHBONE));
+		SetCollectibleCounter((int)m_vCollectibles.size());
 
+		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
+		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
+		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
 		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
 		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
 		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
@@ -320,8 +358,8 @@ void PlayState::GenerateLevel(int level)
 		break;
 
 	case 2:
-		SetCollectibleCounter((int)m_vCollectibles.size());
-
+		SetCurrentLevel(LEVEL_2);
+		SetMapStrings("dungeon2", "dungeon2_complete");
 		m_pPlayer = Player::Instance();
 		m_pPlayer->SetPosition(vec2(90, 360));
 
@@ -340,7 +378,7 @@ void PlayState::GenerateLevel(int level)
 		m_vWalls.push_back(new Wall({ 520, 0, 50, 90 }));
 		m_vWalls.push_back(new Wall({ 1024, 0, 1024, 29 }));
 		m_vWalls.push_back(new Wall({ 0, 0, 26, 768 }));
-		m_vWalls.push_back(new Wall({ 0, 358, 60, 115 }));
+		m_vWalls.push_back(new Wall({ 0, 358, 16, 115 }));
 		m_vWalls.push_back(new Wall({ 0, 550, 90, 118 }));
 		m_vWalls.push_back(new Wall({ 0, 230, 315, 85 }));
 		m_vWalls.push_back(new Wall({ 390, 230, 180, 85 }));
@@ -367,7 +405,7 @@ void PlayState::GenerateLevel(int level)
 		m_vWalls.push_back(new Wall({ 1000, 0, 28, 768 }));
 		m_vWalls.push_back(new Wall({ 935, 70, 100, 53 }));
 		m_vWalls.push_back(new Wall({ 965, 70, 100, 85 }));
-		m_vWalls.push_back(new Wall({ 965, 198, 100, 118 }));
+		m_vWalls.push_back(new Wall({ 1010, 198, 100, 118 }));
 		m_vWalls.push_back(new Wall({ 902, 327, 200, 85 }));
 		m_vWalls.push_back(new Wall({ 902, 645, 200, 55 }));
 		m_vWalls.push_back(new Wall({ 965, 613, 100, 85 }));
@@ -375,6 +413,7 @@ void PlayState::GenerateLevel(int level)
 		m_vCollectibles.push_back(new Collectible(vec2(980, 130), ObjectType::BONE));
 		m_vCollectibles.push_back(new Collectible(vec2(960, 720), ObjectType::RIB));
 		m_vCollectibles.push_back(new Collectible(vec2(280, 690), ObjectType::SKULL));
+		SetCollectibleCounter((int)m_vCollectibles.size());
 
 		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
 		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
@@ -414,7 +453,6 @@ void PlayState::GenerateLevel(int level)
 		e5Points.push_back(glm::vec2(816, 208));
 		e5Points.push_back(glm::vec2(816, 272));
 		e5Points.push_back(glm::vec2(944, 272));
-		//.push_back(glm::vec2(944, 144));
 		e5Points.push_back(glm::vec2(912, 144));
 		e5Points.push_back(glm::vec2(912, 48));
 		e5Points.push_back(glm::vec2(0, 0));
@@ -428,8 +466,8 @@ void PlayState::GenerateLevel(int level)
 		break;
 
 	case 3:
-		SetCollectibleCounter((int)m_vCollectibles.size());
-
+		SetCurrentLevel(LEVEL_3);
+		SetMapStrings("dungeon3", "dungeon3_complete");
 		m_pPlayer = Player::Instance();
 		m_pPlayer->SetPosition(vec2(128, 384));
 
@@ -441,14 +479,14 @@ void PlayState::GenerateLevel(int level)
 
 
 		m_vDoors.push_back(new Door({ 74, 362, 32, 32 }, 3, EXIT));
-		m_vDoors.push_back(new Door({ 904, 43, 32, 32 }, 2, EXIT));
+		m_vDoors.push_back(new Door({ 904, 43, 32, 32 }, 1, EXIT));
 
 		m_vWalls.push_back(new Wall({ 0, 0, 26, 768 }));
 		m_vWalls.push_back(new Wall({ 0, 0, 1024, 26 }));
 		m_vWalls.push_back(new Wall({ 998, 0, 26, 768 }));
 		m_vWalls.push_back(new Wall({ 0, 742, 1024, 26 }));
-		m_vWalls.push_back(new Wall({ 0, 327, 88, 27 }));
-		m_vWalls.push_back(new Wall({ 0, 415, 90, 27 }));
+		m_vWalls.push_back(new Wall({ 0, 327, 88, 20 }));
+		m_vWalls.push_back(new Wall({ 0, 425, 80, 18 }));
 		m_vWalls.push_back(new Wall({ 0, 486, 90, 85 }));
 		m_vWalls.push_back(new Wall({ 0, 615, 88, 84 }));
 		m_vWalls.push_back(new Wall({ 104, 0, 82, 121 }));
@@ -492,14 +530,15 @@ void PlayState::GenerateLevel(int level)
 		m_vWalls.push_back(new Wall({ 871, 228, 87, 87 }));
 		m_vWalls.push_back(new Wall({ 943, 229, 81, 37 }));
 		m_vWalls.push_back(new Wall({ 808, 104, 216, 81 }));
-		m_vWalls.push_back(new Wall({ 838, 0, 63, 60 }));
-		m_vWalls.push_back(new Wall({ 955, 0, 69, 57 }));
+		m_vWalls.push_back(new Wall({ 838, 0, 50, 60 }));
+		m_vWalls.push_back(new Wall({ 962, 0, 69, 57 }));
 		m_vWalls.push_back(new Wall({ 903, 0, 52, 38 }));
 
 
-		m_vCollectibles.push_back(new Collectible(vec2(980, 130), ObjectType::BONE));
-		m_vCollectibles.push_back(new Collectible(vec2(960, 720), ObjectType::RIB));
+		m_vCollectibles.push_back(new Collectible(vec2(980, 100), ObjectType::BONE));
+		m_vCollectibles.push_back(new Collectible(vec2(960, 680), ObjectType::RIB));
 		m_vCollectibles.push_back(new Collectible(vec2(280, 690), ObjectType::SKULL));
+		SetCollectibleCounter((int)m_vCollectibles.size());
 
 		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
 		m_colHUD.push_back(new collectibleHUD(m_pPlayer));
@@ -616,8 +655,9 @@ void PlayState::Update() // *PLAY LOOP RUNS HERE*
 		if (m_pPlayer->GetState() == ACTIVE)
 			m_pPlayer->SetState(DEAD);
 	}
-	if (m_pPlayer->GetState() == PlayerState::ACTIVE && GetExiting())
-		Engine::Instance().GetFSM().ChangeState(new WinState());
+	if (m_pPlayer->GetState() == PlayerState::ACTIVE && GetExiting()) {
+		ChangeLevel();
+	}
 	else if (m_pPlayer->GetState() == PlayerState::DEAD)
 		Engine::Instance().GetFSM().ChangeState(new DeathState());
 }
@@ -626,28 +666,12 @@ void PlayState::Render()
 {
 //	std::cout << "Rendering Game..." << std::endl;
 	SDL_RenderClear(Engine::Instance().GetRenderer());
-	switch (levelInt)
-	{
-	case 1:
-		if (!GetCompleted())
-			TextureManager::Instance()->draw("dungeon1", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
-		else
-			TextureManager::Instance()->draw("dungeon1_complete", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
-		break;
-	case 2:
-		if (!GetCompleted())
-			TextureManager::Instance()->draw("dungeon2", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
-		else
-			TextureManager::Instance()->draw("dungeon2_complete", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
-		break;
-	case 3:
-		if (!GetCompleted())
-			TextureManager::Instance()->draw("dungeon3", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
-		else
-			TextureManager::Instance()->draw("dungeon3_complete", WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
-		break;
+	if (!GetCompleted())
+		TextureManager::Instance()->draw(GetMapString(), WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
+	else 
+		TextureManager::Instance()->draw(GetMapCompletedString(), WIDTH / 2, HEIGHT / 2, Engine::Instance().GetRenderer(), true);
 
-		cout << levelInt << endl;
+	/*	cout << levelInt << endl;
 
 
 		Util::DrawCircle(glm::vec2(48, 144), 10);
@@ -679,7 +703,7 @@ void PlayState::Render()
 		Util::DrawCircle(glm::vec2(848, 720), 10);
 		Util::DrawCircle(glm::vec2(720, 720), 10);
 
-	}
+	}*/
 
 	for (int i = 0; i < (int)m_enemies.size(); i++)
 	{
@@ -689,22 +713,22 @@ void PlayState::Render()
 	{
 		m_vCollectibles[i]->Draw();
 	}
-	m_pPlayer->Draw();
 
-	//for (int i = 0; i < (int)m_vWalls.size(); i++)
-	//{
-	//	m_vWalls[i]->Debug();
-	//}
-	//for (int i = 0; i < (int)m_vDoors.size(); i++)
-	//{
-	//	m_vDoors[i]->Debug();
-	//}
+	/*for (int i = 0; i < (int)m_vWalls.size(); i++)
+	{
+		m_vWalls[i]->Debug();
+	}
+	for (int i = 0; i < (int)m_vDoors.size(); i++)
+	{
+		m_vDoors[i]->Debug();
+	}*/
 
 	for (int i = 0; i < (int)m_colHUD.size(); i++)
 	{
 		if(m_colHUD[i]->GetActiveState() == ACTIVE)
 			m_colHUD[i]->Draw();
 	}
+	m_pPlayer->Draw();
 
 	if (dynamic_cast<PlayState*>(Engine::Instance().GetFSM().GetStates().back()))
 		State::Render();
@@ -715,49 +739,8 @@ void PlayState::Render()
 
 void PlayState::Exit()
 {
-	for (int i = 0; i < (int)m_vObjects.size(); i++)
-	{
-		delete m_vObjects[i];
-		m_vObjects[i] = nullptr;
-	}
-	m_vObjects.clear();
-	m_vObjects.shrink_to_fit();
-	for (int i = 0; i < (int)m_vWalls.size(); i++)
-	{
-		delete m_vWalls[i];
-		m_vWalls[i] = nullptr;
-	}
-	m_vWalls.clear();
-	m_vWalls.shrink_to_fit();
-	for (int i = 0; i < (int)m_vDoors.size(); i++)
-	{
-		delete m_vDoors[i];
-		m_vDoors[i] = nullptr;
-	}
-	m_vDoors.clear();
-	m_vDoors.shrink_to_fit();
-	for (int i = 0; i < (int)m_vCollectibles.size(); i++)
-	{
-		delete m_vCollectibles[i];
-		m_vCollectibles[i] = nullptr;
-	}
-	m_vCollectibles.clear();
-	m_vCollectibles.shrink_to_fit();
-	for (int i = 0; i < (int)m_enemies.size(); i++)
-	{
-		delete m_enemies[i];
-		m_enemies[i] = nullptr;
-	}
-	m_enemies.clear();
-	m_enemies.shrink_to_fit();
+	EmptyLevel();
 	m_pPlayer = nullptr;
-	for (int i = 0; i < (int)m_colHUD.size(); i++)
-	{
-		delete m_colHUD[i];
-		m_colHUD[i] = nullptr;
-	}
-	m_colHUD.clear();
-	m_colHUD.shrink_to_fit();
 }
 
 bool PlayState::CheckCollisions()
@@ -820,6 +803,105 @@ bool PlayState::CheckEnemies()
 		}
 	}
 	return false;
+}
+
+void PlayState::EmptyLevel()
+{
+	SetMapStrings("", "");
+	for (int i = 0; i < (int)m_vObjects.size(); i++)
+	{
+		delete m_vObjects[i];
+		m_vObjects[i] = nullptr;
+	}
+	m_vObjects.clear();
+	m_vObjects.shrink_to_fit();
+	for (int i = 0; i < (int)m_vWalls.size(); i++)
+	{
+		delete m_vWalls[i];
+		m_vWalls[i] = nullptr;
+	}
+	m_vWalls.clear();
+	m_vWalls.shrink_to_fit();
+	for (int i = 0; i < (int)m_vDoors.size(); i++)
+	{
+		delete m_vDoors[i];
+		m_vDoors[i] = nullptr;
+	}
+	m_vDoors.clear();
+	m_vDoors.shrink_to_fit();
+	for (int i = 0; i < (int)m_vCollectibles.size(); i++)
+	{
+		delete m_vCollectibles[i];
+		m_vCollectibles[i] = nullptr;
+	}
+	m_vCollectibles.clear();
+	m_vCollectibles.shrink_to_fit();
+	for (int i = 0; i < (int)m_enemies.size(); i++)
+	{
+		delete m_enemies[i];
+		m_enemies[i] = nullptr;
+	}
+	m_enemies.clear();
+	m_enemies.shrink_to_fit();
+	e1Points.clear();
+	e1Points.shrink_to_fit(); 
+	e2Points.clear();
+	e2Points.shrink_to_fit();
+	e3Points.clear();
+	e3Points.shrink_to_fit();
+	e4Points.clear();
+	e4Points.shrink_to_fit();
+	e5Points.clear();
+	e5Points.shrink_to_fit();
+	e6Points.clear();
+	e6Points.shrink_to_fit();
+
+	for (int i = 0; i < (int)m_colHUD.size(); i++)
+	{
+		delete m_colHUD[i];
+		m_colHUD[i] = nullptr;
+	}
+	m_colHUD.clear();
+	m_colHUD.shrink_to_fit();
+}
+
+void PlayState::ChangeLevel()
+{
+	switch (GetCurrentLevel()) {
+	case TUTORIAL:
+		EmptyLevel();
+		GenerateLevel(1);
+		SetExiting(false);
+		SetCompleted(false);
+		SetHiding(false);
+		SetIndexOfActiveDoor((int)m_vDoors.size());
+		SetCurrentLevel(LEVEL_1);
+		m_pPlayer->SetLightActive(true);
+		break;
+	case LEVEL_1:
+		EmptyLevel();
+		GenerateLevel(2);
+		SetExiting(false);
+		SetCompleted(false);
+		SetHiding(false);
+		SetIndexOfActiveDoor((int)m_vDoors.size());
+		SetCurrentLevel(LEVEL_2);
+		m_pPlayer->SetLightActive(true);
+		break;
+	case LEVEL_2:
+		EmptyLevel();
+		GenerateLevel(3);
+		SetExiting(false);
+		SetCompleted(false);
+		SetHiding(false);
+		SetIndexOfActiveDoor((int)m_vDoors.size());
+		SetCurrentLevel(LEVEL_3);
+		m_pPlayer->SetLightActive(true);
+		break;
+	case LEVEL_3:
+		Engine::Instance().GetFSM().ChangeState(new WinState());
+		break;
+	}
 }
 
 void DeathState::Enter()

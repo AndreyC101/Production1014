@@ -17,10 +17,12 @@ private:
 		m_Sprite,
 		m_SpriteMax,
 		m_spriteMax2;
+	int imageOffset = 0;
 	string spriteString;
 	string spriteStringTwo;
 	int m_movementSprite = 4;
 	int m_lightSprite = 8;
+	bool m_lightActive;
 public:
 	static Player* Instance() {
 		if (s_pInstance == nullptr){
@@ -45,13 +47,12 @@ public:
 	int getMovementSprite() { return m_movementSprite; }
 	void setLightSprite(int spriteNum) { m_lightSprite = spriteNum;  }
 	int getLightSprite() { return m_lightSprite; }
+	bool GetLightActive() { return m_lightActive; }
+	void SetLightActive(bool active) { m_lightActive = active; }
 	void MovementInput();
 	void MoveX();
 	void MoveY();
 	void Update();
 	void Draw();
 	void Clean() {}
-
-
-	int imageOffset = 0;
 };

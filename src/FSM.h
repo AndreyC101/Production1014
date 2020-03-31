@@ -38,6 +38,8 @@ public:
 
 class PlayState : public State {
 private:
+	CurrentLevel m_currentLevel;
+	string m_map, m_mapCompleted;
 	bool m_completed, m_hiding, m_exiting;
 	int m_collectibleCounter, m_indexOfActiveDoor;
 	Player* m_pPlayer;
@@ -73,6 +75,8 @@ public:
 	void SetCollectibleCounter(int newCounter) { m_collectibleCounter = newCounter; }
 	int GetIndexOfActiveDoor() { return m_indexOfActiveDoor; }
 	void SetIndexOfActiveDoor(int index) { m_indexOfActiveDoor = index; }
+	CurrentLevel GetCurrentLevel() { return m_currentLevel; }
+	void SetCurrentLevel(CurrentLevel newLevel) { m_currentLevel = newLevel; }
 	void MovePlayerToActiveDoor();
 	bool GetCompleted() { return m_completed; }
 	void SetCompleted(bool check) { m_completed = check; }
@@ -81,6 +85,11 @@ public:
 	bool GetExiting() { return m_exiting; }
 	void SetExiting(bool check) { m_exiting = check; }
 	bool CheckEnemies();
+	string GetMapString() { return m_map; }
+	string GetMapCompletedString() { return m_mapCompleted; }
+	void SetMapStrings(string map, string mapCompleted) { m_map = map; m_mapCompleted = mapCompleted; }
+	void EmptyLevel();
+	void ChangeLevel();
 };
 
 class PauseState : public State {
