@@ -5,6 +5,8 @@
 #include "Enemy.h"
 #include "LevelObjects.h"
 #include "Collectible.h"
+#include "collectibleHUD.h"
+
 static int m_entry;
 
 class State {
@@ -36,9 +38,11 @@ public:
 
 class PlayState : public State {
 private:
-	bool m_completed, m_exiting;
-	int m_collectibleCounter;
-	vector<Player*> m_vPlayer;
+	CurrentLevel m_currentLevel;
+	string m_map, m_mapCompleted;
+	bool m_completed, m_hiding, m_exiting;
+	int m_collectibleCounter, m_indexOfActiveDoor;
+	Player* m_pPlayer;
 	vector<GameObject*> m_vObjects;
 	vector<Wall*> m_vWalls;
 	vector<Door*> m_vDoors;
@@ -53,6 +57,10 @@ private:
 
 	vector<Enemy*> m_enemies;
 
+	vector<collectibleHUD*> m_colHUD;
+
+	int levelInt;
+
 public:
 	void GenerateLevel(int level);
 	PlayState() {}
@@ -65,10 +73,23 @@ public:
 	int CheckTriggers(); //0-no collision, 1-exit trigger, 2, 3, 4, 5-alcove entries(+2) --add other triggers here
 	int GetCollectibleCounter() { return m_collectibleCounter; }
 	void SetCollectibleCounter(int newCounter) { m_collectibleCounter = newCounter; }
+	int GetIndexOfActiveDoor() { return m_indexOfActiveDoor; }
+	void SetIndexOfActiveDoor(int index) { m_indexOfActiveDoor = index; }
+	CurrentLevel GetCurrentLevel() { return m_currentLevel; }
+	void SetCurrentLevel(CurrentLevel newLevel) { m_currentLevel = newLevel; }
+	void MovePlayerToActiveDoor();
 	bool GetCompleted() { return m_completed; }
 	void SetCompleted(bool check) { m_completed = check; }
+	bool GetHiding() { return m_hiding; }
+	void SetHiding(bool check) { m_hiding = check; }
 	bool GetExiting() { return m_exiting; }
 	void SetExiting(bool check) { m_exiting = check; }
+	bool CheckEnemies();
+	string GetMapString() { return m_map; }
+	string GetMapCompletedString() { return m_mapCompleted; }
+	void SetMapStrings(string map, string mapCompleted) { m_map = map; m_mapCompleted = mapCompleted; }
+	void EmptyLevel();
+	void ChangeLevel();
 };
 
 class PauseState : public State {
@@ -86,11 +107,13 @@ public:
 class HideState : public State {
 private:
 	SDL_Rect m_backGround;
-	vector<Player*> m_vPlayer;
+	Player* m_pPlayer;
 	vector<Wall*> m_vWalls;
-	vector<Door*>m_vDoor;
+	vector<Door*> m_vDoor;
+	bool m_exiting;
+	PlayState* m_pActivePlayState;
 public:
-	HideState() {}
+	HideState(PlayState* activePlayState) { m_pActivePlayState = activePlayState; }
 	~HideState() {}
 	void Enter(); // 0-Up, 1-Down, 2-Left, 3-Right
 	void Update();
@@ -99,6 +122,8 @@ public:
 	vector<Wall*>& GetWalls() { return m_vWalls; }
 	bool CheckCollisions();
 	bool CheckTriggers();
+	bool GetExiting() { return m_exiting; }
+	void SetExiting(bool exiting) { m_exiting = exiting; }
 	static void SetEntry(int entry) { m_entry = entry; }
 };
 
