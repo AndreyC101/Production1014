@@ -8,10 +8,16 @@ enum FSMState {
 	WIN
 };
 
+enum CurrentLevel {
+	TUTORIAL,
+	LEVEL_1
+};
+
 enum PlayerState {
-	ALIVE,
+	ACTIVE,
 	HIDDEN,
-	DEAD
+	DEAD,
+	INACTIVE
 };
 
 enum EnemyState {
@@ -30,7 +36,7 @@ enum DoorState {
 };
 
 enum ActiveState {
-	ACTIVE,
-	INACTIVE
+	ON,
+	OFF
 };
 

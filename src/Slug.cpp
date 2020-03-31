@@ -39,7 +39,7 @@ void Slug::Draw()
 
 	TextureManager::Instance()->modifiedDraw("slug", xComponent, yComponent, 6, imageOffset, Engine::Instance().GetRenderer(), m_currentHeading, 255, true);
 
-	std::cout << "Slug Renderer" << std::endl;
+	//std::cout << "Slug Renderer" << std::endl;
 
 }
 
