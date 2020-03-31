@@ -308,7 +308,6 @@ void PlayState::Enter()
 
 void PlayState::Update() // *PLAY LOOP RUNS HERE*
 {
-	
 	bool earlyHalt = false;
 	if (Engine::Instance().KeyDown(SDL_SCANCODE_W)) {
 		m_vPlayer[0]->SetVelocity(m_vPlayer[0]->GetVelocity() + vec2(0.0f, -1.0f));
@@ -367,14 +366,19 @@ void PlayState::Update() // *PLAY LOOP RUNS HERE*
 	}
 	m_vPlayer[0]->SetVelocity(vec2(0.0f, 0.0f));
 
-	if (GetExiting()) {
-		Engine::Instance().GetFSM().ChangeState(new WinState());
-	}
 	//enemies
 	for (int i = 0; i < (int)m_enemies.size(); i++)
 	{
 		m_enemies[i]->Update();
 	}
+	if (CheckEnemies()) {
+		m_vPlayer[0]->setActive(false);
+	}
+	
+	if (!m_vPlayer[0]->getActive())
+		Engine::Instance().GetFSM().ChangeState(new DeathState());
+	if (m_vPlayer[0]->getActive() && GetExiting())
+		Engine::Instance().GetFSM().ChangeState(new WinState());
 }
 
 void PlayState::Render()
@@ -397,7 +401,6 @@ void PlayState::Render()
 	{
 		m_vPlayer[i]->Draw();
 	}
-	//TODO: draw enemies and objects
 	if (dynamic_cast<PlayState*>(Engine::Instance().GetFSM().GetStates().back()))
 		State::Render();
 
@@ -493,6 +496,16 @@ int PlayState::CheckTriggers()//0-no collision, 1-exit trigger, 2-alcove door tr
 		}
 	}
 	return 0;
+}
+
+bool PlayState::CheckEnemies()
+{
+	for (int i = 0; i < (int)m_enemies.size(); i++) {
+		if (Util::CircleCircle(m_vPlayer[0], m_enemies[i])) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void DeathState::Enter()

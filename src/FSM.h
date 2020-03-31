@@ -69,6 +69,7 @@ public:
 	void SetCompleted(bool check) { m_completed = check; }
 	bool GetExiting() { return m_exiting; }
 	void SetExiting(bool check) { m_exiting = check; }
+	bool CheckEnemies();
 };
 
 class PauseState : public State {

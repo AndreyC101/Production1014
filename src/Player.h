@@ -16,6 +16,7 @@ private:
 	string spriteString;
 	int m_movementSprite = 4;
 	void m_animate();
+	bool m_active;
 public:
 	Player(PlayerState state);
 	~Player() {}
@@ -33,6 +34,8 @@ public:
 	void CalculateNewPositionY();
 	void setMovementSprite(int spriteNum) { m_movementSprite = spriteNum; }
 	int getMovementSprite() { return m_movementSprite; }
+	bool getActive() { return m_active; }
+	void setActive(bool newActive) { m_active = newActive; }
 	void MoveX();
 	void MoveY();
 	void Update();

@@ -9,6 +9,7 @@ Player::Player(PlayerState state) {
 	SetObjectType(ObjectType::PLAYER);
 	SetMoveSpeed(2.5f);
 	SetCollisionRadius(12);
+	setActive(true);
 
 	m_frame = 0;
 	m_frameMax = 8;
