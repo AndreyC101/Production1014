@@ -472,7 +472,6 @@ int PlayState::CheckTriggers()//0-no collision, 1-exit trigger, 2-alcove door tr
 	}
 	return 0;
 }
-
 void PlayState::MovePlayerToActiveDoor()
 {
 	m_pPlayer->SetPosition(m_vDoors[GetIndexOfActiveDoor()]->GetTrigger());
