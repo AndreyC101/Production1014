@@ -2,6 +2,13 @@
 #include <math.h>
 #include "Player.h"
 
+#include "GLM/vec2.hpp"
+#include "GLM/vec4.hpp"
+
+#include "ShapeType.h"
+#include "Engine.h"
+
+
 class Util {
 public:
 
@@ -26,4 +33,9 @@ public:
 	static float Angle(glm::vec2 from, glm::vec2 to);
 	static float SignedAngle(glm::vec2 from, glm::vec2 to);
 	static float Distance(glm::vec2 vecA, glm::vec2 vecB);
+
+	static void DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	static void DrawRect(glm::vec2 position, int width, int height, glm::vec4 colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	static void DrawCircle(glm::vec2 centre, int radius, glm::vec4 colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), ShapeType type = SYMMETRICAL);
+	static void DrawCapsule(glm::vec2 position, int width, int height, glm::vec4 colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 };

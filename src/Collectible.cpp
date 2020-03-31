@@ -13,7 +13,7 @@ Collectible::Collectible(vec2 position, ObjectType type)
 
 void Collectible::Draw()
 {
-	if (GetActiveState() == ACTIVE) {
+	if (GetActiveState() == ON) {
 		switch (GetObjectType()) {
 		case BONE:
 			TextureManager::Instance()->draw("bone", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);
@@ -24,20 +24,6 @@ void Collectible::Draw()
 		case SKULL:
 			TextureManager::Instance()->draw("skull", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);
 			break;
-		case DEATHSKULL:
-			TextureManager::Instance()->draw("dSkull", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);
-			break;
-		case PRESENTBONE:
-			TextureManager::Instance()->draw("pBone", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);
-			break;
-		case FISHBONE:
-			TextureManager::Instance()->draw("fishbone", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);
-			break;
-		case CRACKSKULL:
-			TextureManager::Instance()->draw("crackskull", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);
-			break;
-		case CROSSBONE:
-			TextureManager::Instance()->draw("crossbone", GetPosition().x, GetPosition().y, Engine::Instance().GetRenderer(), true);
 		default:
 			break;
 		}
