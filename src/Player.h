@@ -17,13 +17,10 @@ private:
 		m_Sprite,
 		m_SpriteMax,
 		m_spriteMax2;
-	int imageOffset = 0;
 	string spriteString;
 	string spriteStringTwo;
 	int m_movementSprite = 4;
 	int m_lightSprite = 8;
-	void m_animate();
-	bool m_lightActive;
 public:
 	static Player* Instance() {
 		if (s_pInstance == nullptr){
@@ -41,7 +38,6 @@ public:
 	float GetHideFrames() { return m_hideFrames; }
 	void SetHideFrames(float frames) { m_hideFrames = frames; }
 	void CalculateLampPosition();
-	void calcCollectibles();
 	void SetNewPosition(vec2 position) { m_newPosition = position; }
 	void CalculateNewPositionX();
 	void CalculateNewPositionY();
@@ -50,15 +46,12 @@ public:
 	void setLightSprite(int spriteNum) { m_lightSprite = spriteNum;  }
 	int getLightSprite() { return m_lightSprite; }
 	void MovementInput();
-	bool GetLightActive() { return m_lightActive; }
-	void SetLightActive(bool active) { m_lightActive = active; }
 	void MoveX();
 	void MoveY();
 	void Update();
 	void Draw();
 	void Clean() {}
 
-	/*std::vector<glm::vec2> collectibleHUD;
-	std::vector<Collectible*>* m_collectibles;
-	int numCollectibles;*/
+
+	int imageOffset = 0;
 };

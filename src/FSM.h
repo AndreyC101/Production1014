@@ -5,6 +5,7 @@
 #include "Enemy.h"
 #include "LevelObjects.h"
 #include "Collectible.h"
+#include "collectibleHUD.h"
 
 static int m_entry;
 
@@ -37,8 +38,6 @@ public:
 
 class PlayState : public State {
 private:
-	CurrentLevel m_currentLevel;
-	string m_map, m_mapCompleted;
 	bool m_completed, m_hiding, m_exiting;
 	int m_collectibleCounter, m_indexOfActiveDoor;
 	Player* m_pPlayer;
@@ -56,6 +55,10 @@ private:
 
 	vector<Enemy*> m_enemies;
 
+	vector<collectibleHUD*> m_colHUD;
+
+	int levelInt;
+
 public:
 	void GenerateLevel(int level);
 	PlayState() {}
@@ -66,8 +69,6 @@ public:
 	void Exit();
 	bool CheckCollisions();
 	int CheckTriggers(); //0-no collision, 1-exit trigger, 2, 3, 4, 5-alcove entries(+2) --add other triggers here
-	CurrentLevel GetCurrentLevel() { return m_currentLevel; }
-	void SetCurrentLevel(CurrentLevel newLevel) { m_currentLevel = newLevel; }
 	int GetCollectibleCounter() { return m_collectibleCounter; }
 	void SetCollectibleCounter(int newCounter) { m_collectibleCounter = newCounter; }
 	int GetIndexOfActiveDoor() { return m_indexOfActiveDoor; }
@@ -80,11 +81,6 @@ public:
 	bool GetExiting() { return m_exiting; }
 	void SetExiting(bool check) { m_exiting = check; }
 	bool CheckEnemies();
-	string GetMapString() { return m_map; }
-	string GetMapCompletedString() { return m_mapCompleted; }
-	void SetMapStrings(string map, string mapCompleted) { m_map = map; m_mapCompleted = mapCompleted; }
-	void EmptyLevel();
-	void ChangeLevel();
 };
 
 class PauseState : public State {

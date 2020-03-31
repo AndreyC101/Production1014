@@ -5,21 +5,6 @@
 
 Player* Player::s_pInstance;
 
-void Player::m_animate()
-{
-	if (m_frame == m_frameMax)
-	{
-		m_frame = 0;
-		m_Sprite++;
-		if (m_Sprite == m_SpriteMax)
-		{
-			m_Sprite = 0;
-		}
-		imageOffset = (GetWidth() / m_SpriteMax) * m_Sprite;
-	}
-	m_frame++;
-}
-
 Player::Player() {
 	SetState(PlayerState::INACTIVE);
 	SetScale(vec2(25.0f, 25.0f));
@@ -42,30 +27,15 @@ void Player::CalculateLampPosition()
 	//std::cout << "player Pos is " << GetPosition().x << " " << GetPosition().y << std::endl;
 }
 
-void Player::calcCollectibles()
-{
-	//glm::vec2 spawnPos = glm::vec2(GetPosition().x - TextureManager::Instance()->getTextureSize("player").x / 2, GetPosition().y - TextureManager::Instance()->getTextureSize("player").y / 2);
-	//for (int i = 0; i < numCollectibles; i++)
-	//{
-	//	collectibleHUD[i] = spawnPos + ((float)1000 * Util::Normalize(glm::vec2(/*vector of collectibles*/));
-	//	if (collectibleHUD[i].x < 0)
-	//		collectibleHUD[i].x = 0;
-	//	if (collectibleHUD[i].y < 0)
-	//		collectibleHUD[i].y = 0;
-	//	if (collectibleHUD[i].x > WIDTH)
-	//		collectibleHUD[i].x = WIDTH;
-	//	if (collectibleHUD[i].y > HEIGHT)
-	//		collectibleHUD[i].x = HEIGHT;
-	//}
-}
-
 void Player::CalculateNewPositionX()
 {
 	m_newPosition.x = GetPosition().x + GetVelocity().x * GetMoveSpeed();
+	
 }
 void Player::CalculateNewPositionY()
 {
 	m_newPosition.y = GetPosition().y + GetVelocity().y * GetMoveSpeed();
+
 }
 
 void Player::MovementInput()
@@ -108,7 +78,6 @@ void Player::Update() {
 			SetHideFrames(GetHideFrames() - 1);
 			if (GetHideFrames() < 0) SetHideFrames(0);
 		}
-		m_animate();
 	}
 }
 
@@ -133,9 +102,6 @@ void Player::Draw() {
 			break;
 		}
 		TextureManager::Instance()->modifiedDraw(spriteString, GetPosition().x, GetPosition().y, m_SpriteMax, imageOffset, Engine::Instance().GetRenderer(), 0, 255, true);
-		if (GetLightActive()) {
-			TextureManager::Instance()->draw("lamp_light", m_lampPosition.x, m_lampPosition.y, Engine::Instance().GetRenderer(), true);
-			TextureManager::Instance()->modifiedDraw("light", GetPosition().x, GetPosition().y, m_spriteMax2, imageOffset, Engine::Instance().GetRenderer(), 0, 200, true);
-		}
+		TextureManager::Instance()->draw("lamp_light", m_lampPosition.x, m_lampPosition.y, Engine::Instance().GetRenderer(), true);
 	}
 }
