@@ -11,8 +11,8 @@
 
 enum sound_type
 {
-	SOUND_MUSIC = 0,
-	SOUND_SFX = 1
+	SOUND_MUSIC,
+	SOUND_SFX
 };
 
 class SoundManager {

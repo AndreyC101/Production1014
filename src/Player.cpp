@@ -62,12 +62,10 @@ void Player::calcCollectibles()
 void Player::CalculateNewPositionX()
 {
 	m_newPosition.x = GetPosition().x + GetVelocity().x * GetMoveSpeed();
-	
 }
 void Player::CalculateNewPositionY()
 {
 	m_newPosition.y = GetPosition().y + GetVelocity().y * GetMoveSpeed();
-
 }
 
 void Player::MovementInput()
