@@ -96,8 +96,12 @@ void FSM::LoadAssets()
 	TextureManager::Instance()->load("../Assets/deathSkull.png", "dSkull", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/fishbone.png", "fishbone", Engine::Instance().GetRenderer());
 	TextureManager::Instance()->load("../Assets/crackskull.png", "crackskull", Engine::Instance().GetRenderer());
-
-	//ADD ALL AUDIO FILES HERE USING SoundManager::Instance()->load()
+	SoundManager::Instance()->load("../Assets/Fire.wav", "fire", sound_type::SOUND_MUSIC);
+	SoundManager::Instance()->load("../Assets/Background.wav", "background", sound_type::SOUND_MUSIC);
+	SoundManager::Instance()->load("../Assets/click.wav", "button_press", sound_type::SOUND_SFX);
+	SoundManager::Instance()->load("../Assets/collectible_last.wav", "col_last", sound_type::SOUND_SFX);
+	SoundManager::Instance()->load("../Assets/collectible.wav", "col", sound_type::SOUND_SFX);
+	SoundManager::Instance()->load("../Assets/Collision.wav", "ded", sound_type::SOUND_SFX);
 
 	srand(time(NULL));
 }
@@ -113,6 +117,7 @@ void TitleState::Enter()
 	SetCurrentState(TITLE);
 	m_vButtons.push_back(new StartButton(vec2(240, 490)));
 	m_vButtons.push_back(new QuitButton(vec2(760, 490)));
+	SoundManager::Instance()->playMusic("background", -1);
 }
 
 void TitleState::Update()
@@ -135,6 +140,7 @@ void TitleState::Render()
 
 void TitleState::Exit()
 {
+	Mix_HaltMusic();
 	SDL_RenderClear(Engine::Instance().GetRenderer());
 	std::cout << "Exiting Title..." << std::endl;
 	for (int i = 0; i < (int)m_vButtons.size(); i++) {
@@ -601,6 +607,7 @@ void PlayState::GenerateLevel(int level)
 
 void PlayState::Enter()
 {
+	SoundManager::Instance()->playMusic("fire", -1);
 	SetCurrentState(GAME);
 	GenerateLevel(0);
 	SetExiting(false);
@@ -652,8 +659,10 @@ void PlayState::Update() // *PLAY LOOP RUNS HERE*
 		m_enemies[i]->Update();
 	}
 	if (CheckEnemies()) {
-		if (m_pPlayer->GetState() == ACTIVE)
+		if (m_pPlayer->GetState() == ACTIVE) {
 			m_pPlayer->SetState(DEAD);
+			SoundManager::Instance()->playSound("ded", 0);
+		}
 	}
 	if (m_pPlayer->GetState() == PlayerState::ACTIVE && GetExiting()) {
 		ChangeLevel();
@@ -739,6 +748,7 @@ void PlayState::Render()
 
 void PlayState::Exit()
 {
+	Mix_HaltMusic();
 	EmptyLevel();
 	m_pPlayer = nullptr;
 }
@@ -760,11 +770,13 @@ bool PlayState::CheckCollisions()
 				m_vCollectibles[i]->SetActiveState(ActiveState::OFF);
 				cout << "collision with collectible" << endl;
 				if (GetCollectibleCounter() == 0) {
+					SoundManager::Instance()->playSound("col_last", 0);
 					for (int j = 0; j < (int)m_vDoors.size(); j++) {
 						m_vDoors[j]->SetState(DoorState::OPEN);
 					}
 					SetCompleted(true);
 				}
+				else SoundManager::Instance()->playSound("col", 0);
 			}
 		}
 	}
