@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "Engine.h"
 #include "TextureManager.h"
+#include "SoundManager.h"
 #include <iostream>
 
 Button::Button(vec2 position)
@@ -33,6 +34,7 @@ StartButton::StartButton(vec2 position) : Button(position)
 void StartButton::Execute()
 {
 	//TODO: play button press sounds effect
+	SoundManager::Instance()->playSound("button_press", 0);
 	Engine::Instance().GetFSM().ChangeState(new PlayState);
 }
 
@@ -51,6 +53,7 @@ RestartButton::RestartButton(vec2 position) : Button(position)
 void RestartButton::Execute()
 {
 	//TODO: play button press sound effect
+	SoundManager::Instance()->playSound("button_press", 0);
 	Engine::Instance().GetFSM().ChangeState(new PlayState);
 }
 
@@ -69,6 +72,7 @@ QuitButton::QuitButton(vec2 position) : Button(position)
 void QuitButton::Execute()
 {
 	//TODO: play button press sound effect
+	SoundManager::Instance()->playSound("button_press", 0);
 	Engine::Instance().Quit();
 }
 
@@ -87,6 +91,7 @@ ResumeButton::ResumeButton(vec2 position) : Button(position)
 void ResumeButton::Execute()
 {
 	//TODO: play button press sound effect
+	SoundManager::Instance()->playSound("button_press", 0);
 	Engine::Instance().GetFSM().PopState();
 }
 
